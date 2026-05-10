@@ -309,6 +309,12 @@ const menus: DashboardMenu[] = [
     href: '/dashboard/customers',
   },
   {
+    icon: '💰',
+    title: '매출 관리',
+    desc: '월별·메뉴별 매출, 미수금 현황',
+    href: '/dashboard/sales',
+  },
+  {
     icon: '✏️',
     title: '시술 메뉴',
     desc: '눈썹문신/입술/속눈썹 메뉴 관리',
