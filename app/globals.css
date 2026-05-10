@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+:root {
+  /* BrowChart 디자인 톤 C — 따뜻한 베이지 + 핑크 포인트 */
+  --color-nude: #FAF6F1;           /* 메인 배경 (누드 베이지) */
+  --color-cream-light: #F5EFE6;    /* 카드/섹션 배경 */
+  --color-warm-brown: #6B4F3A;     /* 메인 브라운 (버튼/강조) */
+  --color-deep-brown: #3D2E20;     /* 진한 텍스트/제목 */
+  --color-soft-pink: #E8A598;      /* 포인트 핑크 */
+  --color-rose-light: #F5D5CC;     /* 라이트 핑크 (호버/배경) */
+  --color-greige: #E5DDD0;         /* 그레이지 (보더) */
+  --color-muted: #8B7768;          /* 서브 텍스트 */
+  --color-text-default: #3D2E20;
+
+  /* 매장별 커스터마이징용 — 추후 매장 브랜드 설정에서 덮어씀 */
+  --salon-primary: var(--color-warm-brown);
+  --salon-accent: var(--color-soft-pink);
+}
+
+@theme inline {
+  --color-nude: var(--color-nude);
+  --color-cream-light: var(--color-cream-light);
+  --color-warmbrown: var(--color-warm-brown);
+  --color-deepbrown: var(--color-deep-brown);
+  --color-softpink: var(--color-soft-pink);
+  --color-roselight: var(--color-rose-light);
+  --color-greige: var(--color-greige);
+  --color-muted: var(--color-muted);
+  --color-salonprimary: var(--salon-primary);
+  --color-salonaccent: var(--salon-accent);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
+body {
+  background: var(--color-nude);
+  color: var(--color-text-default);
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  font-feature-settings: "ss01", "ss02";
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.font-display {
+  font-family: var(--font-display), "Pretendard Variable", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* 버튼 기본 스타일 */
+.btn-primary {
+  background: var(--salon-primary);
+  color: var(--color-nude);
+  transition: opacity 0.15s ease;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-accent {
+  background: var(--salon-accent);
+  color: var(--color-deep-brown);
+  transition: opacity 0.15s ease;
+}
+.btn-accent:hover {
+  opacity: 0.9;
+}
