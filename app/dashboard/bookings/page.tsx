@@ -160,9 +160,22 @@ export default function BookingsPage() {
             <Link
               href="/dashboard"
               title="홈으로"
-              className="px-2.5 py-1.5 rounded-lg border border-greige bg-white text-deepbrown hover:bg-nude transition text-base"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-greige bg-white text-deepbrown hover:bg-nude transition"
             >
-              🏠
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M3 11.5 L12 4 L21 11.5" />
+                <path d="M5 10 V20 H19 V10" />
+                <path d="M10 20 V14 H14 V20" />
+              </svg>
             </Link>
             <span className="font-display font-bold text-lg tracking-tight text-deepbrown ml-1">
               예약 관리
