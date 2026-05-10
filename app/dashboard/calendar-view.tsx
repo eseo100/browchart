@@ -1,11 +1,13 @@
 'use client'
 
 import { useEffect, useState, useMemo, useCallback } from 'react'
+import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 
 type CalendarBooking = {
   id: string
   customer_name: string
+  customer_phone: string
   desired_date: string
   desired_time: string | null
   status: string
@@ -64,6 +66,9 @@ export default function CalendarView({
   const [selectedDate, setSelectedDate] = useState<string>(ymd(today))
   const [bookings, setBookings] = useState<CalendarBooking[]>([])
   const [loading, setLoading] = useState(true)
+  const [customerByPhone, setCustomerByPhone] = useState<
+    Record<string, string>
+  >({})
 
   const cells = useMemo(
     () => getCalendarCells(viewYear, viewMonth),
@@ -78,19 +83,30 @@ export default function CalendarView({
     const startStr = ymd(start)
     const endStr = ymd(end)
 
-    const { data } = await supabase
-      .from('bookings')
-      .select(
-        `id, customer_name, desired_date, desired_time, status,
-         menu:menus(name, duration_minutes)`
-      )
-      .eq('salon_id', salonId)
-      .gte('desired_date', startStr)
-      .lte('desired_date', endStr)
-      .order('desired_date')
-      .order('desired_time')
+    const [{ data: bookingData }, { data: customerData }] = await Promise.all([
+      supabase
+        .from('bookings')
+        .select(
+          `id, customer_name, customer_phone, desired_date, desired_time, status,
+           menu:menus(name, duration_minutes)`
+        )
+        .eq('salon_id', salonId)
+        .gte('desired_date', startStr)
+        .lte('desired_date', endStr)
+        .order('desired_date')
+        .order('desired_time'),
+      supabase
+        .from('customers')
+        .select('id, phone')
+        .eq('salon_id', salonId),
+    ])
 
-    setBookings((data as unknown as CalendarBooking[]) ?? [])
+    setBookings((bookingData as unknown as CalendarBooking[]) ?? [])
+    const map: Record<string, string> = {}
+    for (const c of customerData ?? []) {
+      map[(c as { phone: string }).phone] = (c as { id: string }).id
+    }
+    setCustomerByPhone(map)
     setLoading(false)
   }, [salonId, viewYear, viewMonth])
 
@@ -377,31 +393,35 @@ export default function CalendarView({
               {/* 마지막 마감 라인 */}
               <div className="border-t-2 border-greige" />
 
-              {/* 예약 블록 (절대 위치, 행 위에 겹침) */}
+              {/* 예약 블록 (절대 위치, 행 위에 겹침, 클릭 시 고객 차트로) */}
               {selectedBookings.map((b) => {
                 const startMin = parseTimeMin(b.desired_time)
                 if (startMin === null) return null
                 const offsetMin = startMin - selectedDayHours.open * 60
                 if (offsetMin < 0) return null
                 const duration = b.menu?.duration_minutes ?? 60
-                // 30분 = SLOT_PX 라서 1분 = SLOT_PX/30
                 const top = (offsetMin / 30) * SLOT_PX
                 const height = Math.max((duration / 30) * SLOT_PX, SLOT_PX)
                 const baseStyle =
                   b.status === 'pending'
-                    ? 'bg-roselight border-softpink text-deepbrown'
+                    ? 'bg-roselight border-softpink text-deepbrown hover:bg-softpink/40'
                     : b.status === 'confirmed'
-                      ? 'bg-warmbrown text-nude border-warmbrown'
-                      : 'bg-greige text-deepbrown border-greige'
+                      ? 'bg-warmbrown text-nude border-warmbrown hover:opacity-90'
+                      : 'bg-greige text-deepbrown border-greige hover:bg-greige/70'
+                const customerId = customerByPhone[b.customer_phone]
+                const href = customerId
+                  ? `/dashboard/customers/${customerId}`
+                  : `/dashboard/bookings`
                 return (
-                  <div
+                  <Link
                     key={b.id}
-                    className={`absolute left-12 right-2 rounded-md border-2 px-2 py-1 overflow-hidden shadow-sm ${baseStyle}`}
+                    href={href}
+                    className={`absolute left-12 right-2 rounded-md border-2 px-2 py-1 overflow-hidden shadow-sm transition cursor-pointer ${baseStyle}`}
                     style={{
                       top: `${top}px`,
                       height: `${height - 2}px`,
                     }}
-                    title={`${b.desired_time?.slice(0, 5)} · ${b.customer_name} · ${b.menu?.name ?? ''}`}
+                    title={`${b.desired_time?.slice(0, 5)} · ${b.customer_name} · ${b.menu?.name ?? ''} (클릭하면 고객 차트)`}
                   >
                     <p className="text-[10px] font-display font-bold leading-none mb-0.5">
                       {b.desired_time?.slice(0, 5)}
@@ -414,7 +434,7 @@ export default function CalendarView({
                         {b.menu.name}
                       </p>
                     )}
-                  </div>
+                  </Link>
                 )
               })}
 
@@ -439,21 +459,29 @@ export default function CalendarView({
                     <div className="space-y-1">
                       {selectedBookings
                         .filter((b) => !b.desired_time)
-                        .map((b) => (
-                          <div
-                            key={b.id}
-                            className="bg-white border border-greige rounded-md p-2"
-                          >
-                            <p className="text-xs font-bold text-deepbrown">
-                              {b.customer_name}
-                            </p>
-                            {b.menu?.name && (
-                              <p className="text-[10px] font-light text-muted">
-                                {b.menu.name}
+                        .map((b) => {
+                          const customerId =
+                            customerByPhone[b.customer_phone]
+                          const href = customerId
+                            ? `/dashboard/customers/${customerId}`
+                            : `/dashboard/bookings`
+                          return (
+                            <Link
+                              key={b.id}
+                              href={href}
+                              className="block bg-white border border-greige rounded-md p-2 hover:border-warmbrown transition"
+                            >
+                              <p className="text-xs font-bold text-deepbrown">
+                                {b.customer_name}
                               </p>
-                            )}
-                          </div>
-                        ))}
+                              {b.menu?.name && (
+                                <p className="text-[10px] font-light text-muted">
+                                  {b.menu.name}
+                                </p>
+                              )}
+                            </Link>
+                          )
+                        })}
                     </div>
                   </div>
                 )}
