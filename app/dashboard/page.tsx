@@ -6,10 +6,14 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import CalendarView from './calendar-view'
 
+type DayHours = { open: number; close: number; closed: boolean }
+
 type SalonInfo = {
   id: string
   name: string
   slug: string
+  business_hours?: DayHours[] | null
+  closed_dates?: string[] | null
 }
 
 type ProfileInfo = {
@@ -69,7 +73,7 @@ export default function DashboardPage() {
           .maybeSingle(),
         supabase
           .from('salons')
-          .select('id, name, slug')
+          .select('id, name, slug, business_hours, closed_dates')
           .eq('owner_id', user.id)
           .maybeSingle(),
       ])
@@ -215,8 +219,14 @@ export default function DashboardPage() {
           </Link>
         </section>
 
-        {/* 월 캘린더 + 선택일 상세 */}
-        {salon && <CalendarView salonId={salon.id} />}
+        {/* 월 캘린더 + 선택일 타임테이블 */}
+        {salon && (
+          <CalendarView
+            salonId={salon.id}
+            businessHours={salon.business_hours ?? null}
+            closedDates={salon.closed_dates ?? []}
+          />
+        )}
 
         {/* 주요 기능 카드 */}
         <section>

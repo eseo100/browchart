@@ -12,19 +12,15 @@ type CalendarBooking = {
   menu: { name: string; duration_minutes: number } | null
 }
 
+type DayHours = { open: number; close: number; closed: boolean }
+
 type Props = {
   salonId: string
+  businessHours?: DayHours[] | null
+  closedDates?: string[]
 }
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토']
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: '대기',
-  confirmed: '확정',
-  completed: '완료',
-  cancelled: '취소',
-  no_show: '노쇼',
-}
 
 const STATUS_DOT: Record<string, string> = {
   pending: 'bg-softpink',
@@ -55,7 +51,11 @@ function getCalendarCells(year: number, month: number) {
   return cells
 }
 
-export default function CalendarView({ salonId }: Props) {
+export default function CalendarView({
+  salonId,
+  businessHours,
+  closedDates = [],
+}: Props) {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -136,6 +136,29 @@ export default function CalendarView({ salonId }: Props) {
   }, [bookings])
 
   const selectedBookings = byDate[selectedDate] ?? []
+
+  // 선택일의 영업시간 (요일 기준, 없으면 기본 10~19)
+  const selectedDayHours = (() => {
+    if (!selectedDate) return { open: 10, close: 19, closed: false }
+    const d = new Date(selectedDate + 'T00:00:00')
+    const dow = d.getDay()
+    const fromHours = businessHours?.[dow]
+    if (fromHours) return fromHours
+    return { open: 10, close: 19, closed: false }
+  })()
+
+  const isSelectedClosed =
+    selectedDayHours.closed || closedDates.includes(selectedDate)
+
+  // 타임테이블 — 30분 단위 행
+  const SLOT_PX = 32 // 30분 1행 높이 (1시간 = 64px)
+  const totalSlots = (selectedDayHours.close - selectedDayHours.open) * 2
+
+  const parseTimeMin = (timeStr: string | null) => {
+    if (!timeStr) return null
+    const [h, m] = timeStr.split(':').map(Number)
+    return h * 60 + m
+  }
 
   return (
     <section>
@@ -265,62 +288,177 @@ export default function CalendarView({ salonId }: Props) {
           </div>
         </div>
 
-        {/* 선택한 날짜 디테일 */}
-        <div className="bg-cream-light border border-greige rounded-2xl p-5 lg:max-h-[500px] lg:overflow-y-auto">
-          <p className="font-display font-bold text-base tracking-tight text-deepbrown mb-1">
-            {(() => {
-              const d = new Date(selectedDate + 'T00:00:00')
-              const wd = WEEKDAYS[d.getDay()]
-              return `${d.getMonth() + 1}월 ${d.getDate()}일 (${wd})`
-            })()}
-          </p>
-          <p className="text-xs font-light text-muted mb-4">
-            {selectedBookings.length}건의 예약
-          </p>
+        {/* 선택한 날짜 타임테이블 — 캘린더와 같은 높이, 내부 스크롤 */}
+        <div className="bg-cream-light border border-greige rounded-2xl p-4 lg:h-full flex flex-col min-h-[400px]">
+          <div className="shrink-0 mb-3">
+            <p className="font-display font-bold text-base tracking-tight text-deepbrown mb-1">
+              {(() => {
+                const d = new Date(selectedDate + 'T00:00:00')
+                const wd = WEEKDAYS[d.getDay()]
+                return `${d.getMonth() + 1}월 ${d.getDate()}일 (${wd})`
+              })()}
+            </p>
+            <p className="text-xs font-light text-muted mb-2">
+              {isSelectedClosed
+                ? '🔒 휴무'
+                : `${selectedDayHours.open}:00 ~ ${selectedDayHours.close}:00 영업 · ${selectedBookings.length}건`}
+            </p>
+            {/* 색상 범례 */}
+            {!isSelectedClosed && (
+              <div className="flex items-center gap-2.5 text-[10px]">
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-roselight border border-softpink" />
+                  <span className="font-medium text-muted">대기</span>
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-warmbrown" />
+                  <span className="font-medium text-muted">확정</span>
+                </span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-greige" />
+                  <span className="font-medium text-muted">완료</span>
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex-1 overflow-y-auto -mx-4 px-4">
+            <div className="space-y-3">
 
           {loading ? (
             <p className="text-sm font-light text-muted">불러오는 중...</p>
-          ) : selectedBookings.length === 0 ? (
-            <p className="text-xs font-light text-muted">
-              이 날 예약이 없어요.
-            </p>
+          ) : isSelectedClosed ? (
+            <div className="bg-white border border-greige rounded-xl p-6 text-center">
+              <p className="text-2xl mb-1">🔒</p>
+              <p className="text-sm font-medium text-deepbrown">휴무일</p>
+              {selectedBookings.length > 0 && (
+                <p className="text-[11px] font-light text-muted mt-2">
+                  ⚠️ 예약 {selectedBookings.length}건 있음
+                </p>
+              )}
+            </div>
           ) : (
-            <div className="space-y-2">
-              {selectedBookings.map((b) => (
-                <div
-                  key={b.id}
-                  className="bg-white border border-greige rounded-xl p-3"
-                >
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <p className="font-display font-bold text-sm text-deepbrown">
-                      {b.desired_time?.slice(0, 5) ?? '시간 미정'}
-                    </p>
-                    <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                        b.status === 'pending'
-                          ? 'bg-roselight text-deepbrown'
-                          : b.status === 'confirmed'
-                            ? 'bg-warmbrown text-nude'
-                            : 'bg-greige text-muted'
+            <div className="relative bg-white border-2 border-greige rounded-xl overflow-hidden">
+              {/* 30분 단위 행 (테이블 베이스) */}
+              {Array.from({ length: totalSlots }).map((_, i) => {
+                const totalMin = selectedDayHours.open * 60 + i * 30
+                const h = Math.floor(totalMin / 60)
+                const m = totalMin % 60
+                const isHour = m === 0
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-stretch ${
+                      i === 0
+                        ? ''
+                        : isHour
+                          ? 'border-t-2 border-greige'
+                          : 'border-t border-greige/50'
+                    }`}
+                    style={{ height: `${SLOT_PX}px` }}
+                  >
+                    <div
+                      className={`w-12 shrink-0 px-2 pt-1 ${
+                        isHour
+                          ? 'font-display text-xs font-bold text-deepbrown'
+                          : 'font-display text-[10px] font-light text-muted'
                       }`}
                     >
-                      {STATUS_LABEL[b.status] ?? b.status}
-                    </span>
+                      {pad(h)}:{pad(m)}
+                    </div>
+                    <div
+                      className={`flex-1 ${
+                        isHour ? '' : 'border-l border-greige/30'
+                      }`}
+                    />
                   </div>
-                  <p className="font-bold text-sm text-deepbrown tracking-tight">
-                    {b.customer_name}
-                  </p>
-                  {b.menu?.name && (
-                    <p className="text-xs font-light text-muted mt-0.5">
-                      {b.menu.name}
-                      {b.menu.duration_minutes &&
-                        ` · ${b.menu.duration_minutes}분`}
+                )
+              })}
+
+              {/* 마지막 마감 라인 */}
+              <div className="border-t-2 border-greige" />
+
+              {/* 예약 블록 (절대 위치, 행 위에 겹침) */}
+              {selectedBookings.map((b) => {
+                const startMin = parseTimeMin(b.desired_time)
+                if (startMin === null) return null
+                const offsetMin = startMin - selectedDayHours.open * 60
+                if (offsetMin < 0) return null
+                const duration = b.menu?.duration_minutes ?? 60
+                // 30분 = SLOT_PX 라서 1분 = SLOT_PX/30
+                const top = (offsetMin / 30) * SLOT_PX
+                const height = Math.max((duration / 30) * SLOT_PX, SLOT_PX)
+                const baseStyle =
+                  b.status === 'pending'
+                    ? 'bg-roselight border-softpink text-deepbrown'
+                    : b.status === 'confirmed'
+                      ? 'bg-warmbrown text-nude border-warmbrown'
+                      : 'bg-greige text-deepbrown border-greige'
+                return (
+                  <div
+                    key={b.id}
+                    className={`absolute left-12 right-2 rounded-md border-2 px-2 py-1 overflow-hidden shadow-sm ${baseStyle}`}
+                    style={{
+                      top: `${top}px`,
+                      height: `${height - 2}px`,
+                    }}
+                    title={`${b.desired_time?.slice(0, 5)} · ${b.customer_name} · ${b.menu?.name ?? ''}`}
+                  >
+                    <p className="text-[10px] font-display font-bold leading-none mb-0.5">
+                      {b.desired_time?.slice(0, 5)}
                     </p>
-                  )}
+                    <p className="text-[11px] font-bold leading-tight truncate">
+                      {b.customer_name}
+                    </p>
+                    {height >= 50 && b.menu?.name && (
+                      <p className="text-[9px] font-light leading-tight truncate opacity-80">
+                        {b.menu.name}
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+
+              {/* 예약 없을 때 안내 */}
+              {selectedBookings.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <p className="text-xs font-light text-muted bg-white/80 px-3 py-1 rounded">
+                    이 날 예약이 없어요
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           )}
+
+              {/* 시간 미정 예약 (별도 표시) */}
+              {!isSelectedClosed &&
+                selectedBookings.some((b) => !b.desired_time) && (
+                  <div className="mt-3">
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                      시간 미정
+                    </p>
+                    <div className="space-y-1">
+                      {selectedBookings
+                        .filter((b) => !b.desired_time)
+                        .map((b) => (
+                          <div
+                            key={b.id}
+                            className="bg-white border border-greige rounded-md p-2"
+                          >
+                            <p className="text-xs font-bold text-deepbrown">
+                              {b.customer_name}
+                            </p>
+                            {b.menu?.name && (
+                              <p className="text-[10px] font-light text-muted">
+                                {b.menu.name}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+          </div>
         </div>
       </div>
     </section>
