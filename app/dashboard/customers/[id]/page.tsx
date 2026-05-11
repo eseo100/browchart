@@ -84,48 +84,6 @@ const STATUS_STYLE: Record<string, string> = {
   no_show: 'bg-cream-light text-muted',
 }
 
-const SKIN_TYPES = ['건성', '지성', '복합성', '민감성', '중성', '트러블성']
-
-const ALLERGY_OPTIONS = [
-  '아토피',
-  '약물 알러지',
-  '리도카인 알러지',
-  '임신/수유',
-  '켈로이드 체질',
-  '헤르페스',
-  '당뇨',
-  '고혈압',
-  '혈액응고제 복용',
-  '자가면역질환',
-  '흉터 잘 생김',
-]
-
-const DESIGN_GROUPS: { label: string; items: string[] }[] = [
-  {
-    label: '눈썹',
-    items: ['아치형', '일자형', '둥근형', '각진형', '자연형', '평행형'],
-  },
-  {
-    label: '입술',
-    items: ['M자형', '스마일형', '풀립', '라인립', '그라데이션'],
-  },
-  {
-    label: '속눈썹',
-    items: ['J컬', 'C컬', 'CC컬', 'M컬', '볼륨', '내추럴'],
-  },
-]
-
-const COLOR_GROUPS: { label: string; items: string[] }[] = [
-  {
-    label: '눈썹 컬러',
-    items: ['다크브라운', '미디엄브라운', '라이트브라운', '소프트블랙', '차콜그레이'],
-  },
-  {
-    label: '입술 컬러',
-    items: ['코랄', '핑크', '와인', '누드', '레드', '체리'],
-  },
-]
-
 function formatPhone(p: string) {
   const digits = p.replace(/\D/g, '')
   if (digits.length === 11)
@@ -145,11 +103,6 @@ function formatDateK(d: string | null) {
   const date = new Date(d.includes('T') ? d : d + 'T00:00:00')
   const wd = ['일', '월', '화', '수', '목', '금', '토'][date.getDay()]
   return `${date.getFullYear()}.${date.getMonth() + 1}.${date.getDate()} (${wd})`
-}
-
-// 칩 토글 헬퍼
-function toggleArr(arr: string[], item: string): string[] {
-  return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item]
 }
 
 export default function CustomerDetailPage({
@@ -530,27 +483,27 @@ export default function CustomerDetailPage({
               </div>
             </div>
 
-            {/* 2줄: 생일 + 최근 시술 + 다음 리터치 — 3등분으로 사이즈 통일 */}
+            {/* 2줄: 생일 + 최근 시술 + 리터치 예정일 — 3등분, 라벨/높이 통일 */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex flex-col">
-                <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                <label className="block text-xs font-medium text-deepbrown mb-1.5 whitespace-nowrap">
                   생일
                 </label>
                 <input
                   type="date"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown box-border"
                 />
                 <p className="text-[10px] font-light text-muted mt-1 invisible">
                   &nbsp;
                 </p>
               </div>
               <div className="flex flex-col">
-                <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                <label className="block text-xs font-medium text-deepbrown mb-1.5 whitespace-nowrap">
                   최근 시술
                 </label>
-                <div className="w-full h-10 px-3 bg-greige/30 border border-greige rounded-lg text-sm text-deepbrown flex items-center truncate">
+                <div className="w-full h-10 px-3 bg-greige/30 border border-greige rounded-lg text-sm text-deepbrown flex items-center truncate box-border">
                   {(() => {
                     const last =
                       history.find((h) => h.status === 'completed') ?? history[0]
@@ -569,22 +522,22 @@ export default function CustomerDetailPage({
                     )
                   })()}
                 </div>
-                <p className="text-[10px] font-light text-muted mt-1">
+                <p className="text-[10px] font-light text-muted mt-1 whitespace-nowrap">
                   예약 이력에서 자동
                 </p>
               </div>
               <div className="flex flex-col">
-                <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                  다음 리터치 예정일
+                <label className="block text-xs font-medium text-deepbrown mb-1.5 whitespace-nowrap">
+                  리터치 예정일
                 </label>
                 <input
                   type="date"
                   value={nextRetouchDate}
                   onChange={(e) => setNextRetouchDate(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown box-border"
                 />
-                <p className="text-[10px] font-light text-muted mt-1">
-                  시술 완료 시 35일 후 자동
+                <p className="text-[10px] font-light text-muted mt-1 whitespace-nowrap">
+                  시술 완료 시 35일 후
                 </p>
               </div>
             </div>
