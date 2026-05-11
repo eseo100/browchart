@@ -256,8 +256,8 @@ export default function PhotoSection({ customerId, salonId }: Props) {
         </div>
       )}
 
-      {/* 갤러리 (종류별로 묶음) */}
-      <div className="space-y-5">
+      {/* 갤러리 (종류별로 가로 3열) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {beforePhotos.length > 0 && (
           <PhotoGroup
             label="시술 전"
@@ -546,7 +546,7 @@ function PhotoGroup({
         </span>
         <span className="text-xs font-light text-muted">{photos.length}장</span>
       </div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 gap-2">
         {photos.map((p) => (
           <button
             key={p.id}
