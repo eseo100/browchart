@@ -51,6 +51,19 @@ function toggleArr(arr: string[], item: string): string[] {
   return arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item]
 }
 
+type ExistingConsent = {
+  id: string
+  title: string
+  signed_name: string
+  signed_at: string
+  signature: string
+  body: {
+    sections?: { title: string; bullets: string[] }[]
+    agreements?: string[]
+  } | null
+  agreements: { text: string; checked: boolean }[] | null
+}
+
 type Props = {
   customerId: string
   customerName: string | null
@@ -58,6 +71,7 @@ type Props = {
   salonId: string
   activeBooking: { id: string; menuCategory: string } | null
   consentAlreadySigned: boolean
+  existingConsent?: ExistingConsent | null
   initial: {
     skinType: string
     allergies: string
@@ -87,6 +101,7 @@ export default function CustomerMode({
   salonId,
   activeBooking,
   consentAlreadySigned,
+  existingConsent,
   initial,
   onExit,
 }: Props) {
@@ -468,13 +483,94 @@ export default function CustomerMode({
           </section>
         )}
 
-        {/* 이미 서명된 경우 안내 */}
+        {/* 이미 서명된 경우 — 클릭하면 동의서 내용 펼쳐 보기 */}
         {!!activeBooking && consentAlreadySigned && (
-          <section className="bg-cream-light border border-greige rounded-2xl p-4 text-center">
-            <p className="text-sm font-medium text-deepbrown">
-              ✓ 이번 시술 동의서는 이미 작성되었어요
-            </p>
-          </section>
+          <details className="bg-cream-light border border-greige rounded-2xl">
+            <summary className="cursor-pointer p-4 text-center list-none hover:bg-nude/40 transition rounded-2xl">
+              <p className="text-sm font-medium text-deepbrown">
+                ✓ 이번 시술 동의서는 이미 작성되었어요
+                {existingConsent && (
+                  <span className="block text-[11px] font-light text-muted mt-1">
+                    클릭하면 작성된 동의서 내용을 볼 수 있어요 ▾
+                  </span>
+                )}
+              </p>
+            </summary>
+            {existingConsent && (
+              <div className="p-5 border-t border-greige space-y-4">
+                <div>
+                  <h3 className="font-display font-bold text-base tracking-tight text-deepbrown mb-1">
+                    📋 {existingConsent.title}
+                  </h3>
+                  <p className="text-[11px] font-light text-muted">
+                    서명자: {existingConsent.signed_name} ·{' '}
+                    {new Date(existingConsent.signed_at).toLocaleString('ko-KR')}
+                  </p>
+                </div>
+
+                {/* 본문 섹션 */}
+                {(existingConsent.body?.sections ?? []).map((sec, i) => (
+                  <div key={i} className="bg-white rounded-lg p-3">
+                    <p className="font-bold text-deepbrown text-xs mb-1.5">
+                      {i + 1}. {sec.title}
+                    </p>
+                    <ul className="space-y-1">
+                      {(sec.bullets ?? []).map((b, j) => (
+                        <li
+                          key={j}
+                          className="text-[11px] font-light text-deepbrown leading-relaxed flex gap-1.5"
+                        >
+                          <span className="text-muted shrink-0">•</span>
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+
+                {/* 동의 체크 항목 */}
+                {existingConsent.agreements &&
+                  existingConsent.agreements.length > 0 && (
+                    <div>
+                      <p className="font-bold text-deepbrown text-xs mb-1.5">
+                        ✅ 동의 사항
+                      </p>
+                      <div className="space-y-1.5">
+                        {existingConsent.agreements.map((a, i) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 bg-white rounded-lg p-2"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={a.checked}
+                              disabled
+                              className="mt-0.5 w-3.5 h-3.5 accent-warmbrown shrink-0"
+                            />
+                            <span className="text-[11px] text-deepbrown leading-relaxed">
+                              {a.text}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                {/* 서명 */}
+                <div>
+                  <p className="font-bold text-deepbrown text-xs mb-1.5">
+                    ✍️ 서명
+                  </p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={existingConsent.signature}
+                    alt="서명"
+                    className="bg-white border-2 border-greige rounded-lg w-full max-w-sm"
+                  />
+                </div>
+              </div>
+            )}
+          </details>
         )}
 
         {/* 다 적었어요 버튼 */}

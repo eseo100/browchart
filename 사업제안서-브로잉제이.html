@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>BrowChart × 브로잉제이 사업제안서</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    color: #3D2E20;
+    background: #fff;
+    line-height: 1.6;
+  }
+  .slide {
+    width: 210mm;
+    min-height: 148mm;
+    margin: 0 auto;
+    padding: 28mm 24mm;
+    background: #FAF6F1;
+    border-bottom: 1px dashed #E5DDD0;
+    page-break-after: always;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .slide.cover {
+    justify-content: center;
+    text-align: center;
+    background: linear-gradient(135deg, #FAF6F1 0%, #F5EFE6 100%);
+  }
+  .slide.center {
+    justify-content: center;
+    text-align: center;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: #E8A598;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: 36px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: #3D2E20;
+    margin-bottom: 16px;
+    line-height: 1.2;
+  }
+  .cover h1 { font-size: 44px; }
+  h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #3D2E20;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #6B4F3A;
+  }
+  h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #6B4F3A;
+    margin: 18px 0 8px;
+  }
+  p { margin-bottom: 10px; }
+  .lead {
+    font-size: 18px;
+    color: #6B4F3A;
+    margin-bottom: 24px;
+    font-weight: 500;
+  }
+  .sub {
+    font-size: 14px;
+    color: #8B7768;
+  }
+  .footer-info {
+    margin-top: 40px;
+    font-size: 13px;
+    color: #8B7768;
+    line-height: 1.8;
+  }
+  ul { margin: 12px 0 12px 20px; }
+  li { margin-bottom: 8px; font-size: 14px; line-height: 1.7; }
+  .pain-list { list-style: none; margin-left: 0; }
+  .pain-list li {
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    border-left: 4px solid #E8A598;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .pain-list li strong {
+    display: block;
+    color: #6B4F3A;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 13px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid #E5DDD0;
+  }
+  th {
+    background: #6B4F3A;
+    color: #FAF6F1;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  td:first-child { font-weight: 600; color: #3D2E20; }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 18px;
+  }
+  .feature {
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .feature .icon { font-size: 24px; margin-bottom: 6px; }
+  .feature .title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #6B4F3A;
+    margin-bottom: 4px;
+  }
+  .feature .desc { font-size: 12px; color: #8B7768; line-height: 1.6; }
+  .differentiators {
+    list-style: none;
+    margin: 0;
+    counter-reset: diff-counter;
+  }
+  .differentiators li {
+    counter-increment: diff-counter;
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    padding: 12px 16px 12px 50px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    position: relative;
+    font-size: 13px;
+  }
+  .differentiators li::before {
+    content: counter(diff-counter);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #6B4F3A;
+    color: #FAF6F1;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .flow {
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    border-radius: 12px;
+    padding: 18px 22px;
+    font-family: 'Space Grotesk', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    color: #3D2E20;
+  }
+  .flow .arrow { color: #E8A598; }
+  .stage {
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    padding: 16px 18px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .stage-title {
+    font-weight: 700;
+    color: #6B4F3A;
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+  .stage-title .num {
+    background: #E8A598;
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    margin-right: 8px;
+    font-weight: 700;
+  }
+  .price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 18px 0;
+  }
+  .plan {
+    background: #fff;
+    border: 2px solid #E5DDD0;
+    border-radius: 12px;
+    padding: 18px;
+    text-align: center;
+  }
+  .plan.recommended { border-color: #E8A598; background: #FFF8F5; }
+  .plan-name { font-size: 13px; font-weight: 700; color: #6B4F3A; }
+  .plan-price {
+    font-size: 26px;
+    font-weight: 800;
+    color: #3D2E20;
+    margin: 6px 0;
+  }
+  .plan-target { font-size: 11px; color: #8B7768; }
+  .calc-box {
+    background: #F5EFE6;
+    border: 1px solid #E5DDD0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 14px 0;
+    font-size: 13px;
+  }
+  .calc-box .calc-line { color: #8B7768; }
+  .calc-box .calc-result {
+    color: #6B4F3A;
+    font-weight: 700;
+    font-size: 16px;
+    margin-top: 8px;
+  }
+  .responsibility {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 18px 0;
+  }
+  .resp-col {
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .resp-col h3 { margin-top: 0; }
+  .resp-col li { font-size: 13px; }
+  .timeline {
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    border-radius: 12px;
+    padding: 16px 22px;
+    font-size: 13px;
+    line-height: 2.2;
+  }
+  .timeline .when {
+    display: inline-block;
+    width: 130px;
+    font-weight: 700;
+    color: #6B4F3A;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+  .next-steps { counter-reset: ns; list-style: none; margin: 0; }
+  .next-steps li {
+    counter-increment: ns;
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    padding: 12px 18px 12px 48px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    position: relative;
+    font-size: 14px;
+  }
+  .next-steps li::before {
+    content: counter(ns);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #E8A598;
+    color: #3D2E20;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .contact {
+    background: #6B4F3A;
+    color: #FAF6F1;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: left;
+    font-size: 14px;
+    line-height: 2;
+    margin-top: 30px;
+  }
+  .contact .name { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .slide-no {
+    position: absolute;
+    bottom: 12mm;
+    right: 24mm;
+    font-size: 10px;
+    color: #8B7768;
+  }
+  .demo-url {
+    background: #fff;
+    border: 1px solid #E5DDD0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-family: 'Space Grotesk', monospace;
+    font-size: 13px;
+    color: #6B4F3A;
+  }
+  .quote {
+    background: #F5EFE6;
+    border-left: 4px solid #E8A598;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #6B4F3A;
+    font-weight: 500;
+  }
+  @media print {
+    .slide { margin: 0; box-shadow: none; border-bottom: none; }
+    body { background: #fff; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1 -->
+<section class="slide cover">
+  <div class="badge">Business Proposal</div>
+  <h1>반영구 메이크업 매장의<br>새로운 디지털 인프라</h1>
+  <p class="lead">BrowChart × 브로잉제이 협업 제안</p>
+  <div class="footer-info">
+    2026년 5월<br>
+    제안자 · 장미나
+  </div>
+  <div class="slide-no">01 / 18</div>
+</section>
+
+<!-- SLIDE 2 -->
+<section class="slide">
+  <div class="badge">왜 만나뵙고 싶었나</div>
+  <h2>업계 표준을 만든 분과 시스템을 만들고 싶습니다</h2>
+  <p class="lead">반영구 메이크업의 운영 방식을 디지털화한 전용 SaaS, 함께 완성하실 분이 필요해요.</p>
+  <ul>
+    <li>브로잉제이 원장님은 시술뿐 아니라 강의·교육 분야에서도 업계 표준이세요.</li>
+    <li>그 운영 방식과 노하우를 도구화하면, 더 많은 시술자가 같은 수준으로 매장을 운영할 수 있습니다.</li>
+    <li>BrowChart는 그 도구의 기반이고, 첫 파트너로 원장님을 모시고 싶습니다.</li>
+  </ul>
+  <div class="quote">"원장님의 운영 방식 = BrowChart의 기능 설계도"</div>
+  <div class="slide-no">02 / 18</div>
+</section>
+
+<!-- SLIDE 3 -->
+<section class="slide">
+  <div class="badge">시장 진단</div>
+  <h2>반영구 시술자가 매일 겪는 현실</h2>
+  <ul class="pain-list">
+    <li>
+      <strong>🔴 예약 관리의 혼란</strong>
+      카톡/전화/DM 다중 채널 → 누락·중복. 입금 확인은 수동, 노쇼 방지가 어려움.
+    </li>
+    <li>
+      <strong>🔴 차트는 종이로 관리</strong>
+      펜·노트로 적은 차트는 분실 위험. 사진은 폰에 흩어져 있고, 시술 전·후 비교가 어려움. 리터치 타이밍을 놓침.
+    </li>
+    <li>
+      <strong>🔴 동의서 종이 보관</strong>
+      시술마다 작성 + 캐비넷 보관. 분쟁 시 찾기 어렵고 분실 위험 큼.
+    </li>
+  </ul>
+  <p class="sub" style="margin-top:16px"><strong>결과</strong>: 시술 시간보다 행정에 더 시간 씀.</p>
+  <div class="slide-no">03 / 18</div>
+</section>
+
+<!-- SLIDE 4 -->
+<section class="slide">
+  <div class="badge">시장 분석</div>
+  <h2>기존 솔루션의 한계</h2>
+  <table>
+    <thead>
+      <tr><th>솔루션</th><th>한계</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>콜라보살롱</td><td>통합형 (네일·미용·반영구). 반영구 전용 깊이 X</td></tr>
+      <tr><td>네이버/카카오 예약</td><td>예약만 지원. 차트·동의서·사진 X</td></tr>
+      <tr><td>종이/엑셀</td><td>분실, 검색 어려움, 백업 X</td></tr>
+      <tr><td>개별 앱들</td><td>예약 앱 + 차트 앱 + 사진 앱 따로따로</td></tr>
+    </tbody>
+  </table>
+  <div class="quote">반영구 메이크업 전용 통합 SaaS는 비어있는 시장입니다.</div>
+  <div class="slide-no">04 / 18</div>
+</section>
+
+<!-- SLIDE 5 -->
+<section class="slide">
+  <div class="badge">제품 소개</div>
+  <h2>BrowChart — 반영구 시술자를 위한 통합 운영 SaaS</h2>
+  <div class="feature-grid">
+    <div class="feature">
+      <div class="icon">📅</div>
+      <div class="title">예약 시스템</div>
+      <div class="desc">손님이 링크/QR로 직접 예약. 시간 충돌 자동 차단. 입금 확인 / 상태 관리.</div>
+    </div>
+    <div class="feature">
+      <div class="icon">👤</div>
+      <div class="title">고객 차트</div>
+      <div class="desc">상담 차트(손님 입력) + 진단 차트(원장 입력) 분리. 펜 시안 (Apple Pencil 지원). 시술 전·후 사진 비교 슬라이더.</div>
+    </div>
+    <div class="feature">
+      <div class="icon">✍️</div>
+      <div class="title">전자 동의서</div>
+      <div class="desc">카테고리별 자동 템플릿(눈썹/입술/속눈썹). 디지털 서명 + 자동 저장.</div>
+    </div>
+    <div class="feature">
+      <div class="icon">📊</div>
+      <div class="title">운영 대시보드</div>
+      <div class="desc">월 캘린더 + 시간대별 타임테이블. 매출 분석 (메뉴별/일별). 고객 등급 자동 (VIP/단골/신규).</div>
+    </div>
+  </div>
+  <div class="slide-no">05 / 18</div>
+</section>
+
+<!-- SLIDE 6 -->
+<section class="slide">
+  <div class="badge">차별화 포인트</div>
+  <h2>7대 차별 기능</h2>
+  <p class="sub">기존 통합형(콜라보살롱) · 네이버 예약에 없는 반영구 전용 기능들</p>
+  <ul class="differentiators">
+    <li>얼굴 사진 위 디자인 시안 (Apple Pencil 지원)</li>
+    <li>시술 전·후 사진 비교 슬라이더</li>
+    <li>눈썹/입술/속눈썹 모양 라이브러리</li>
+    <li>부위별 차트 (각 시술 특화)</li>
+    <li>모듈형 동의서 + 전자서명 (카테고리 자동)</li>
+    <li>리터치 자동 알림 (4~6주 후 SMS·알림톡)</li>
+    <li>컬러/디자인 태그 라이브러리</li>
+  </ul>
+  <div class="slide-no">06 / 18</div>
+</section>
+
+<!-- SLIDE 6.5 — 단계별 협업 -->
+<section class="slide">
+  <div class="badge">협업 방식</div>
+  <h2>단계별로 함께 만들어갑니다</h2>
+  <p class="lead">베타 → 2차 미팅 → 추가 기능 / 가격 플랜 협의</p>
+
+  <div class="responsibility">
+    <div class="resp-col">
+      <h3>📍 1차 미팅 (오늘)</h3>
+      <ul>
+        <li>BrowChart 데모 시연</li>
+        <li>베타 시작 의사 결정</li>
+        <li>1개월 베타 협약 체결</li>
+      </ul>
+    </div>
+    <div class="resp-col">
+      <h3>📍 베타 (1개월)</h3>
+      <ul>
+        <li>실제 매장 사용 + 피드백</li>
+        <li>주 1회 미팅</li>
+        <li>즉시 수정 / 개선</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="resp-col" style="margin-top:14px;border-color:#E8A598;background:#FFF8F5">
+    <h3>📍 2차 미팅 (베타 종료 시점)</h3>
+    <ul>
+      <li>추가로 필요한 기능 협의 (예: 시그니처 디자인 라이브러리, 알림톡 자동화, 인스타 공유, 고객 LTV 분석 등)</li>
+      <li>매장이 진짜 필요로 하는 것부터 우선 개발</li>
+      <li><strong style="color:#6B4F3A">추가 기능에 따라 가격 플랜 / 수익 분배 조율 가능</strong></li>
+      <li>정식 계약 체결</li>
+    </ul>
+  </div>
+
+  <div class="quote">"무엇을 먼저 만들지·얼마에 할지" 함께 정함 → 양측 win-win</div>
+  <div class="slide-no">07 / 18</div>
+</section>
+
+<!-- SLIDE 7 -->
+<section class="slide">
+  <div class="badge">라이브 데모</div>
+  <h2>이미 작동합니다</h2>
+  <p class="lead">기획서가 아닙니다. 실제 운영 가능한 제품입니다.</p>
+  <div class="demo-url">손님 예약 페이지 → https://browchart.vercel.app/booking/minabrow</div>
+  <div class="demo-url">원장 대시보드 → https://browchart.vercel.app/dashboard</div>
+  <p style="margin-top:14px">
+    오늘 미팅에서 직접 시연합니다:<br>
+    캘린더, 타임테이블, 고객 차트, 동의서, 사진 비교 등.
+  </p>
+  <div class="quote">제품이 비전을 증명합니다.</div>
+  <div class="slide-no">08 / 18</div>
+</section>
+
+<!-- SLIDE 8 -->
+<section class="slide">
+  <div class="badge">운영 흐름</div>
+  <h2>시술 한 건이 시스템에서 어떻게 흘러가나</h2>
+  <div class="flow">
+    손님 카톡으로 링크 받음<br>
+    <span class="arrow">↓</span><br>
+    링크 클릭 → 매장 페이지 → 메뉴 선택<br>
+    <span class="arrow">↓</span><br>
+    달력에서 날짜·시간 선택 (자동 충돌 방지)<br>
+    <span class="arrow">↓</span><br>
+    손님 정보 입력 + 예약금 안내 → 신청 완료<br>
+    <span class="arrow">↓</span> [원장에게 알림]<br>
+    원장: 예약 관리에서 확인 → 확정 / 입금 체크<br>
+    <span class="arrow">↓</span><br>
+    시술 당일 손님 도착<br>
+    <span class="arrow">↓</span><br>
+    원장: 고객 차트 → "고객 모드" → iPad 손님에게<br>
+    <span class="arrow">↓</span><br>
+    손님: 동의서 + 상담 카드 + 펜 그림 직접 작성<br>
+    <span class="arrow">↓</span> [PIN 입력]<br>
+    원장: 진단 차트 + 디자인 시안 그리기 → 시술<br>
+    <span class="arrow">↓</span><br>
+    시술 후 사진 업로드 → 시술 완료 처리<br>
+    <span class="arrow">↓</span> [자동]<br>
+    방문횟수 +1, 다음 리터치일 35일 후 자동 등록<br>
+    <span class="arrow">↓</span><br>
+    35일 후 → 자동 알림톡 → 재예약 유도
+  </div>
+  <div class="slide-no">09 / 18</div>
+</section>
+
+<!-- SLIDE 9 -->
+<section class="slide">
+  <div class="badge">파트너십 의의</div>
+  <h2>왜 브로잉제이와 함께해야 하나</h2>
+  <h3>🎯 정확한 페르소나</h3>
+  <p>브로잉제이 원장 = BrowChart가 만들고자 하는 이상적 사용자. 베타 피드백이 제품의 깊이를 결정합니다.</p>
+  <h3>🎓 수강생 → 매장 = 즉각적 유저베이스</h3>
+  <p>강의 1회당 N명의 시술자가 잠재 고객. 강사가 직접 추천 → 신뢰 즉시 형성.</p>
+  <h3>🤝 공동 브랜딩 효과</h3>
+  <p>"브로잉제이 원장이 직접 쓰는 시스템"이라는 메시지. 마케팅 비용 절감 + 브랜드 권위.</p>
+  <div class="slide-no">10 / 18</div>
+</section>
+
+<!-- SLIDE 10 -->
+<section class="slide">
+  <div class="badge">협업 모델</div>
+  <h2>3단계 파트너십</h2>
+  <div class="stage">
+    <div class="stage-title"><span class="num">1</span>베타 — 1개월</div>
+    <ul style="margin-left:14px;margin-top:6px">
+      <li>브로잉제이 원장님 매장에서 무료 사용</li>
+      <li>주 1회 피드백 미팅</li>
+      <li>미나님이 즉시 수정/개선</li>
+      <li>부족한 기능 발견 → 우선순위 빠른 반영</li>
+    </ul>
+  </div>
+  <div class="stage">
+    <div class="stage-title"><span class="num">2</span>강의 연계 — 2~6개월차</div>
+    <ul style="margin-left:14px;margin-top:6px">
+      <li>브로잉제이 강의에서 BrowChart 도입 시연</li>
+      <li>수강생 가입 시 추천 코드 → 추적</li>
+      <li>첫 매장 50개 모집</li>
+    </ul>
+  </div>
+  <div class="stage">
+    <div class="stage-title"><span class="num">3</span>정식 파트너십 — 6개월~</div>
+    <ul style="margin-left:14px;margin-top:6px">
+      <li>수익 분배 본격 시작</li>
+      <li>공동 마케팅</li>
+      <li>신기능 협업 개발</li>
+    </ul>
+  </div>
+  <div class="slide-no">11 / 18</div>
+</section>
+
+<!-- SLIDE 11 -->
+<section class="slide">
+  <div class="badge">수익 모델</div>
+  <h2>단순한 단일 플랜</h2>
+  <p class="lead">매장 입장에서 의사결정 쉽게 — 단계 X, 모든 기능 풀 사용</p>
+
+  <div class="price-grid" style="grid-template-columns: 1fr; max-width: 320px; margin: 24px auto;">
+    <div class="plan recommended">
+      <div class="plan-name">BrowChart</div>
+      <div class="plan-price">월 19,000원</div>
+      <div class="plan-target">VAT 별도 · 14일 무료 체험</div>
+      <div style="font-size:11px;color:#8B7768;margin-top:10px;line-height:1.6">
+        모든 기능 무제한<br>
+        다단계 플랜 X · 단일 가격
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-box">
+    <div class="calc-line">시술 1건 (~20만원)의 약 <strong>9.5%</strong> 수준</div>
+    <div class="calc-line">매월 신규 예약 1건만 더 받아도 12개월치 회수</div>
+    <div class="calc-result">예상 매출 (1년 후): 100매장 × 19,000원 = 월 190만원 / 연 2,280만원</div>
+  </div>
+
+  <p class="sub">콜라보살롱과 동가 (19,000원). 무료 체험 14일 동일 또는 30일로 차별화 가능.</p>
+  <div class="slide-no">12 / 18</div>
+</section>
+
+<!-- SLIDE 12 -->
+<section class="slide">
+  <div class="badge">수익 분배</div>
+  <h2>브로잉제이 트레일링 커미션 30%</h2>
+  <ul>
+    <li><strong>대상</strong>: 브로잉제이 강의/네트워크 통해 가입한 매장 (추천 코드 추적)</li>
+    <li><strong>기간</strong>: 매장 가입 후 24개월</li>
+    <li><strong>수익 정의</strong>: 매장 구독료 (결제수수료 차감 후)</li>
+  </ul>
+  <div class="calc-box">
+    <div class="calc-line">강의로 50매장 가입 → 19,000원 × 50 = 월 95만원</div>
+    <div class="calc-line">그 중 30% = <strong style="color:#6B4F3A">월 28.5만원</strong></div>
+    <div class="calc-result">→ 연 342만원 (강의 추가 시 매장 증가 → 누적 증가)</div>
+    <div class="calc-line" style="margin-top:8px;font-size:12px">100매장 → 월 57만원, 200매장 → 월 114만원</div>
+  </div>
+  <h3 style="margin-top:18px">추가 베네핏</h3>
+  <ul>
+    <li>베타 협업 1개월 별도 수당 (협의)</li>
+    <li>공식 강사 권한 (BrowChart 추천 시스템 단독 진입)</li>
+    <li>공동 마케팅 자료 활용권</li>
+  </ul>
+  <div class="slide-no">13 / 18</div>
+</section>
+
+<!-- SLIDE 13 -->
+<section class="slide">
+  <div class="badge">역할 분담</div>
+  <h2>양측 책임</h2>
+  <div class="responsibility">
+    <div class="resp-col">
+      <h3>미나님 (BrowChart)</h3>
+      <ul>
+        <li>제품 개발 · 운영</li>
+        <li>호스팅 · DB 관리 · 보안</li>
+        <li>매장 고객 지원</li>
+        <li>마케팅 자료 제공</li>
+        <li>수익 분배 정산 (월 1회)</li>
+      </ul>
+    </div>
+    <div class="resp-col">
+      <h3>브로잉제이</h3>
+      <ul>
+        <li>강의에서 자연스러운 도입</li>
+        <li>베타 기간 주 1회 피드백</li>
+        <li>추천 코드 활용</li>
+        <li>공동 콘텐츠 출연 (선택)</li>
+        <li>본인 매장 + 강의는 자유</li>
+      </ul>
+    </div>
+  </div>
+  <div class="quote">서로의 영역을 명확히 분리. 각자 잘하는 일에 집중.</div>
+  <div class="slide-no">14 / 18</div>
+</section>
+
+<!-- SLIDE 14 -->
+<section class="slide">
+  <div class="badge">타임라인</div>
+  <h2>1년 로드맵</h2>
+  <div class="timeline">
+    <span class="when">현재 (5월)</span>사업제안 + 베타 시작<br>
+    <span class="when">6월</span>베타 진행 + 피드백 반영<br>
+    <span class="when">7월 초</span>정식 계약 체결<br>
+    <span class="when">7월 중후반</span>강의 첫 도입 (수강생 추천)<br>
+    <span class="when">8월~</span>매장 확장 + 수익 분배 시작<br>
+    <span class="when">12월</span>첫 50매장 달성 목표<br>
+    <span class="when">2027년 상반기</span>100매장 + 알림톡/SMS 자동화
+  </div>
+  <div class="slide-no">15 / 18</div>
+</section>
+
+<!-- SLIDE 15 -->
+<section class="slide">
+  <div class="badge">Risk 관리</div>
+  <h2>양측이 안전하게</h2>
+  <h3>미나님이 책임지는 것</h3>
+  <ul>
+    <li>시스템 안정성 · 보안</li>
+    <li>매장 데이터 보호 (개인정보보호법 준수)</li>
+    <li>지속적 신기능 개발</li>
+  </ul>
+  <h3>계약서로 명확히 할 것</h3>
+  <ul>
+    <li>추천 코드 추적 + 정산 방식</li>
+    <li>Exit clause (양측 6개월 시점 재협상권)</li>
+    <li>비밀 유지 + 1년 경쟁 금지</li>
+    <li>수익 정의 (매출 vs 순매출)</li>
+  </ul>
+  <div class="quote">정식 계약 전 변호사 검토 권장. 양측 안전한 장기 협업.</div>
+  <div class="slide-no">16 / 18</div>
+</section>
+
+<!-- SLIDE 16 -->
+<section class="slide">
+  <div class="badge">다음 단계</div>
+  <h2>오늘 미팅 후 진행 순서</h2>
+  <ol class="next-steps">
+    <li>베타 협약서 검토 (1페이지, 1주일 내)</li>
+    <li>베타 시작 — 계정 생성·교육 30분</li>
+    <li>1개월 베타 + 주 1회 피드백 미팅</li>
+    <li>베타 종료 시 Term Sheet 협의</li>
+    <li>정식 계약 (변호사 검토)</li>
+  </ol>
+  <h3 style="margin-top:24px">오늘 결정 부탁드리는 것</h3>
+  <ul>
+    <li>✅ 베타 시작 의사</li>
+    <li>📅 시작 가능 시점</li>
+  </ul>
+  <div class="slide-no">17 / 18</div>
+</section>
+
+<!-- SLIDE 17 -->
+<section class="slide cover">
+  <div class="badge">Thank You</div>
+  <h1>BrowChart × 브로잉제이</h1>
+  <p class="lead">반영구 시장의 새로운 표준</p>
+  <div class="contact">
+    <div class="name">장미나 (Mina Jang)</div>
+    BrowChart 개발 · 대표<br>
+    📧 jangmina7@naver.com<br>
+    📱 010-XXXX-XXXX<br>
+    🌐 https://browchart.vercel.app
+  </div>
+  <div class="slide-no">18 / 18</div>
+</section>
+
+</body>
+</html>

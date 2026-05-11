@@ -61,6 +61,11 @@ type SignedConsent = {
   signed_name: string
   signed_at: string
   signature: string
+  body: {
+    sections?: { title: string; bullets: string[] }[]
+    agreements?: string[]
+  } | null
+  agreements: { text: string; checked: boolean }[] | null
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -236,7 +241,7 @@ export default function CustomerDetailPage({
         .maybeSingle(),
       supabase
         .from('consents')
-        .select('id, booking_id, template_key, title, signed_name, signed_at, signature')
+        .select('id, booking_id, template_key, title, signed_name, signed_at, signature, body, agreements')
         .eq('customer_id', customerData.id)
         .order('signed_at', { ascending: false }),
     ])
@@ -998,21 +1003,84 @@ export default function CustomerDetailPage({
                         </div>
                       )}
                       {consent ? (
-                        <div className="pt-2 border-t border-greige/60">
-                          <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                            ✍️ {consent.title}
-                          </p>
-                          <p className="text-xs font-light text-muted mb-2">
-                            서명자: {consent.signed_name} ·{' '}
-                            {new Date(consent.signed_at).toLocaleString('ko-KR')}
-                          </p>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={consent.signature}
-                            alt="서명"
-                            className="bg-white border border-greige rounded-lg w-full max-w-xs"
-                          />
-                        </div>
+                        <details className="pt-2 border-t border-greige/60">
+                          <summary className="cursor-pointer text-xs font-semibold text-warmbrown hover:text-deepbrown py-1 list-none flex items-center justify-between">
+                            <span>✍️ 동의서 보기 — {consent.title}</span>
+                            <span className="text-[10px] text-muted">펼치기 ▾</span>
+                          </summary>
+                          <div className="mt-3 space-y-3">
+                            <p className="text-[11px] font-light text-muted">
+                              서명자: {consent.signed_name} ·{' '}
+                              {new Date(consent.signed_at).toLocaleString('ko-KR')}
+                            </p>
+
+                            {/* 본문 섹션 */}
+                            {(consent.body?.sections ?? []).map((sec, i) => (
+                              <div
+                                key={i}
+                                className="bg-cream-light rounded-lg p-3"
+                              >
+                                <p className="font-bold text-deepbrown text-xs mb-1.5">
+                                  {i + 1}. {sec.title}
+                                </p>
+                                <ul className="space-y-1">
+                                  {(sec.bullets ?? []).map((b, j) => (
+                                    <li
+                                      key={j}
+                                      className="text-[11px] font-light text-deepbrown leading-relaxed flex gap-1.5"
+                                    >
+                                      <span className="text-muted shrink-0">
+                                        •
+                                      </span>
+                                      <span>{b}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))}
+
+                            {/* 동의 체크 항목 */}
+                            {consent.agreements &&
+                              consent.agreements.length > 0 && (
+                                <div>
+                                  <p className="font-bold text-deepbrown text-xs mb-1.5">
+                                    ✅ 동의 사항
+                                  </p>
+                                  <div className="space-y-1.5">
+                                    {consent.agreements.map((a, i) => (
+                                      <div
+                                        key={i}
+                                        className="flex items-start gap-2 bg-cream-light rounded-lg p-2"
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          checked={a.checked}
+                                          disabled
+                                          className="mt-0.5 w-3.5 h-3.5 accent-warmbrown shrink-0"
+                                        />
+                                        <span className="text-[11px] text-deepbrown leading-relaxed">
+                                          {a.text}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                            {/* 서명 */}
+                            <div>
+                              <p className="font-bold text-deepbrown text-xs mb-1.5">
+                                ✍️ 서명
+                              </p>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={consent.signature}
+                                alt="서명"
+                                className="bg-white border-2 border-greige rounded-lg w-full max-w-sm"
+                              />
+                            </div>
+                          </div>
+                        </details>
                       ) : (
                         <p className="text-xs font-light text-muted pt-2 border-t border-greige/60">
                           동의서 미작성
@@ -1069,6 +1137,7 @@ export default function CustomerDetailPage({
                 : null
             }
             consentAlreadySigned={!!consentForActive}
+            existingConsent={consentForActive ?? null}
             initial={{
               skinType,
               allergies,

@@ -13,6 +13,11 @@ type ConsentRow = {
   signature: string
   customer_id: string | null
   booking_id: string | null
+  body: {
+    sections?: { title: string; bullets: string[] }[]
+    agreements?: string[]
+  } | null
+  agreements: { text: string; checked: boolean }[] | null
   customer: { name: string | null; phone: string; customer_number: number | null } | null
   booking: {
     desired_date: string | null
@@ -64,7 +69,7 @@ export default function ConsentsPage() {
         .from('consents')
         .select(
           `id, template_key, title, signed_name, signed_at, signature,
-           customer_id, booking_id,
+           customer_id, booking_id, body, agreements,
            customer:customers(name, phone, customer_number),
            booking:bookings(desired_date, desired_time, menu:menus(name, category))`
         )
@@ -240,60 +245,125 @@ export default function ConsentsPage() {
                   </div>
                 </summary>
 
-                {/* 펼쳐보기 */}
-                <div className="border-t border-greige bg-white p-5 space-y-3">
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                      동의서 제목
-                    </p>
-                    <p className="font-bold text-deepbrown text-sm">
-                      {c.title}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                      서명자
-                    </p>
-                    <p className="text-sm text-deepbrown">{c.signed_name}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                      서명 일시
-                    </p>
-                    <p className="text-sm text-deepbrown">
-                      {new Date(c.signed_at).toLocaleString('ko-KR')}
-                    </p>
-                  </div>
-                  {c.booking?.desired_date && (
+                {/* 펼쳐보기 — 동의서 전체 내용 */}
+                <div className="border-t border-greige bg-white p-5 space-y-5">
+                  {/* 메타 정보 */}
+                  <div className="grid grid-cols-2 gap-3 text-xs pb-3 border-b border-greige">
                     <div>
-                      <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
-                        예약 일시
+                      <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-0.5">
+                        서명자
                       </p>
-                      <p className="text-sm text-deepbrown">
-                        {c.booking.desired_date}
-                        {c.booking.desired_time &&
-                          ` ${c.booking.desired_time.slice(0, 5)}`}
+                      <p className="text-deepbrown font-medium">
+                        {c.signed_name}
                       </p>
                     </div>
-                  )}
+                    <div>
+                      <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-0.5">
+                        서명 일시
+                      </p>
+                      <p className="text-deepbrown font-medium">
+                        {new Date(c.signed_at).toLocaleString('ko-KR')}
+                      </p>
+                    </div>
+                    {c.booking?.desired_date && (
+                      <div className="col-span-2">
+                        <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-0.5">
+                          예약 일시
+                        </p>
+                        <p className="text-deepbrown font-medium">
+                          {c.booking.desired_date}
+                          {c.booking.desired_time &&
+                            ` ${c.booking.desired_time.slice(0, 5)}`}
+                          {c.booking.menu?.name && (
+                            <span className="font-light text-muted ml-2">
+                              · {c.booking.menu.name}
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 동의서 제목 */}
                   <div>
-                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
-                      서명
+                    <h3 className="font-display font-bold text-base tracking-tight text-deepbrown">
+                      📋 {c.title}
+                    </h3>
+                  </div>
+
+                  {/* 본문 섹션 */}
+                  {(c.body?.sections ?? []).map((sec, i) => (
+                    <div key={i} className="bg-cream-light rounded-lg p-4">
+                      <p className="font-bold text-deepbrown text-sm mb-2">
+                        {i + 1}. {sec.title}
+                      </p>
+                      <ul className="space-y-1">
+                        {(sec.bullets ?? []).map((b, j) => (
+                          <li
+                            key={j}
+                            className="text-xs font-light text-deepbrown leading-relaxed flex gap-2"
+                          >
+                            <span className="text-muted shrink-0">•</span>
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+
+                  {/* 동의 체크 항목 */}
+                  {c.agreements && c.agreements.length > 0 && (
+                    <div>
+                      <p className="font-bold text-deepbrown text-sm mb-2">
+                        ✅ 동의 사항
+                      </p>
+                      <div className="space-y-2">
+                        {c.agreements.map((a, i) => (
+                          <div
+                            key={i}
+                            className="flex items-start gap-2 bg-cream-light rounded-lg p-3"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={a.checked}
+                              disabled
+                              className="mt-0.5 w-4 h-4 accent-warmbrown shrink-0"
+                            />
+                            <span className="text-xs text-deepbrown leading-relaxed">
+                              {a.text}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 서명 */}
+                  <div>
+                    <p className="font-bold text-deepbrown text-sm mb-2">
+                      ✍️ 서명
                     </p>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={c.signature}
                       alt="서명"
-                      className="bg-white border border-greige rounded-lg w-full max-w-md"
+                      className="bg-white border-2 border-greige rounded-lg w-full max-w-md"
                     />
+                    <p className="text-[11px] font-light text-muted mt-2">
+                      {c.signed_name} · {new Date(c.signed_at).toLocaleString('ko-KR')}
+                    </p>
                   </div>
+
+                  {/* 차트 바로가기 */}
                   {c.customer_id && (
-                    <Link
-                      href={`/dashboard/customers/${c.customer_id}`}
-                      className="inline-block text-xs font-semibold text-deepbrown underline hover:text-warmbrown"
-                    >
-                      → 이 손님 차트 보기
-                    </Link>
+                    <div className="pt-3 border-t border-greige">
+                      <Link
+                        href={`/dashboard/customers/${c.customer_id}`}
+                        className="inline-block text-xs font-semibold text-deepbrown underline hover:text-warmbrown"
+                      >
+                        → 이 손님 차트 보기
+                      </Link>
+                    </div>
                   )}
                 </div>
               </details>
