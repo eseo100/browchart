@@ -364,12 +364,12 @@ export default function CustomerMode({
             ))}
           </div>
           <p className="text-xs font-medium text-deepbrown mt-3 mb-1.5">
-            ✏️ 원하는 모양을 펜으로 그려주세요
+            ✏️ 기타 요청 사항을 적어주세요
           </p>
           <SignaturePad
             value={designDrawing}
             onChange={setDesignDrawing}
-            placeholder="✏️ 원하시는 모양을 직접 그려주세요"
+            placeholder="✏️ 기타 요청 사항을 적어주세요"
             clearLabel="다시 그리기"
           />
         </section>
