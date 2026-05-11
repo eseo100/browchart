@@ -145,7 +145,7 @@ export default function NewBookingModal({
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <div>
+          <div className="flex flex-col">
             <label className="block text-xs font-medium text-deepbrown mb-1.5">
               날짜
             </label>
@@ -153,10 +153,10 @@ export default function NewBookingModal({
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2.5 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+              className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
             />
           </div>
-          <div>
+          <div className="flex flex-col">
             <label className="block text-xs font-medium text-deepbrown mb-1.5">
               시간
             </label>
@@ -164,7 +164,7 @@ export default function NewBookingModal({
               type="time"
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full px-3 py-2.5 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+              className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
             />
           </div>
         </div>

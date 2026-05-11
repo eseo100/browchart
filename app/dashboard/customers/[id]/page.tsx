@@ -500,83 +500,93 @@ export default function CustomerDetailPage({
           <h2 className="font-display font-bold text-xl tracking-tight text-deepbrown mb-4">
             기본 정보
           </h2>
-          <div className="bg-cream-light border border-greige rounded-2xl p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                이름
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                전화번호
-              </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
-              />
-              <p className="text-[10px] font-light text-muted mt-1">
-                ⚠️ 같은 번호로 다른 손님이 등록돼있으면 저장 안 돼요.
-              </p>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                생일
-              </label>
-              <input
-                type="date"
-                value={birthDate}
-                onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                최근 시술
-              </label>
-              <div className="px-3 py-2 bg-greige/30 border border-greige rounded-lg text-sm text-deepbrown min-h-[38px] flex items-center">
-                {(() => {
-                  const last =
-                    history.find((h) => h.status === 'completed') ?? history[0]
-                  if (!last) return <span className="text-muted">아직 없음</span>
-                  return (
-                    <span>
-                      <span className="font-display font-semibold">
-                        {formatDateK(last.desired_date)}
-                      </span>
-                      {last.menu?.name && (
-                        <span className="font-light text-muted ml-2">
-                          · {last.menu.name}
-                        </span>
-                      )}
-                    </span>
-                  )
-                })()}
+          <div className="bg-cream-light border border-greige rounded-2xl p-5 space-y-4">
+            {/* 1줄: 이름 + 전화번호 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                  이름
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                />
               </div>
-              <p className="text-[10px] font-light text-muted mt-1">
-                예약 이력에서 자동으로 불러와요.
-              </p>
+              <div>
+                <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                  전화번호
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                />
+                <p className="text-[10px] font-light text-muted mt-1">
+                  ⚠️ 같은 번호로 다른 손님이 등록돼있으면 저장 안 돼요.
+                </p>
+              </div>
             </div>
-            <div>
-              <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                다음 리터치 예정일
-              </label>
-              <input
-                type="date"
-                value={nextRetouchDate}
-                onChange={(e) => setNextRetouchDate(e.target.value)}
-                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
-              />
-              <p className="text-[10px] font-light text-muted mt-1">
-                시술 완료 처리하면 35일 후로 자동 설정돼요.
-              </p>
+
+            {/* 2줄: 생일 + 최근 시술 + 다음 리터치 — 3등분으로 사이즈 통일 */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="flex flex-col">
+                <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                  생일
+                </label>
+                <input
+                  type="date"
+                  value={birthDate}
+                  onChange={(e) => setBirthDate(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                />
+                <p className="text-[10px] font-light text-muted mt-1 invisible">
+                  &nbsp;
+                </p>
+              </div>
+              <div className="flex flex-col">
+                <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                  최근 시술
+                </label>
+                <div className="w-full h-10 px-3 bg-greige/30 border border-greige rounded-lg text-sm text-deepbrown flex items-center truncate">
+                  {(() => {
+                    const last =
+                      history.find((h) => h.status === 'completed') ?? history[0]
+                    if (!last) return <span className="text-muted">아직 없음</span>
+                    return (
+                      <span className="truncate">
+                        <span className="font-display font-semibold">
+                          {formatDateK(last.desired_date)}
+                        </span>
+                        {last.menu?.name && (
+                          <span className="font-light text-muted ml-2">
+                            · {last.menu.name}
+                          </span>
+                        )}
+                      </span>
+                    )
+                  })()}
+                </div>
+                <p className="text-[10px] font-light text-muted mt-1">
+                  예약 이력에서 자동
+                </p>
+              </div>
+              <div className="flex flex-col">
+                <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                  다음 리터치 예정일
+                </label>
+                <input
+                  type="date"
+                  value={nextRetouchDate}
+                  onChange={(e) => setNextRetouchDate(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                />
+                <p className="text-[10px] font-light text-muted mt-1">
+                  시술 완료 시 35일 후 자동
+                </p>
+              </div>
             </div>
           </div>
         </section>
