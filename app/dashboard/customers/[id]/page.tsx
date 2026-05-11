@@ -684,207 +684,182 @@ export default function CustomerDetailPage({
           </div>
         </section>
 
-        {/* 피부 타입 (상담 차트 첫 항목) */}
+        {/* 손님이 입력한 내용 — 깔끔하게 요약만 (수정은 고객 모드에서) */}
         <section>
-          <h3 className="font-bold text-base tracking-tight text-deepbrown mb-2">
-            피부 타입
-          </h3>
-          <div className="bg-cream-light border border-greige rounded-2xl p-5">
-            <select
-              value={skinType}
-              onChange={(e) => setSkinType(e.target.value)}
-              className="w-full sm:max-w-xs px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
-            >
-              <option value="">선택하세요</option>
-              {SKIN_TYPES.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-
-        {/* 알러지/특이사항 */}
-        <section>
-          <h2 className="font-display font-bold text-xl tracking-tight text-deepbrown mb-2">
-            알러지/특이사항
-          </h2>
-          <p className="text-xs font-light text-muted mb-3">
-            해당하는 항목을 모두 누르세요. 없는 건 아래 메모에 적어주세요.
-          </p>
-          <div className="bg-cream-light border border-greige rounded-2xl p-5 space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {ALLERGY_OPTIONS.map((a) => {
-                const on = allergiesTags.includes(a)
-                return (
-                  <button
-                    key={a}
-                    type="button"
-                    onClick={() => setAllergiesTags(toggleArr(allergiesTags, a))}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition ${
-                      on
-                        ? 'bg-softpink text-deepbrown border-softpink'
-                        : 'bg-white text-deepbrown border-greige hover:bg-nude'
-                    }`}
-                  >
-                    {on && '✓ '}
-                    {a}
-                  </button>
-                )
-              })}
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                기타 메모 (원장 작성)
-              </label>
-              <textarea
-                rows={2}
-                value={allergies}
-                onChange={(e) => setAllergies(e.target.value)}
-                placeholder="위에 없는 특이사항을 자유롭게 적어주세요."
-                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown resize-none"
-              />
-            </div>
-            {allergiesDrawing && (
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-medium text-deepbrown">
-                    ✏️ 손님이 직접 그린 메모
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm('손님이 그린 그림을 지울까요?')) {
-                        setAllergiesDrawing(null)
-                      }
-                    }}
-                    className="text-[11px] font-semibold text-muted hover:text-deepbrown underline"
-                  >
-                    지우기
-                  </button>
+          {(() => {
+            const hasAnyInput =
+              skinType ||
+              allergiesTags.length > 0 ||
+              allergies.trim() ||
+              allergiesDrawing ||
+              designTags.length > 0 ||
+              preferredDesign.trim() ||
+              designDrawing ||
+              colorTags.length > 0
+            if (!hasAnyInput) {
+              return (
+                <div className="bg-cream-light border border-dashed border-greige rounded-2xl p-6 text-center">
+                  <p className="text-3xl mb-2">💁</p>
+                  <p className="text-sm font-light text-muted">
+                    아직 손님이 작성한 내용이 없어요.
+                    <br />
+                    <span className="font-medium text-deepbrown">
+                      우측 상단 💁 고객 모드
+                    </span>
+                    를 열어서 손님이 직접 작성하게 해주세요.
+                  </p>
                 </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={allergiesDrawing}
-                  alt="손님이 그린 알러지 메모"
-                  className="bg-white border border-greige rounded-lg w-full"
-                />
-              </div>
-            )}
-          </div>
-        </section>
+              )
+            }
+            return (
+              <div className="bg-cream-light border border-greige rounded-2xl p-5 space-y-4">
+                {skinType && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                      피부 타입
+                    </p>
+                    <p className="text-sm text-deepbrown font-medium">
+                      {skinType}
+                    </p>
+                  </div>
+                )}
 
-        {/* 선호 디자인 */}
-        <section>
-          <h2 className="font-display font-bold text-xl tracking-tight text-deepbrown mb-2">
-            선호 디자인
-          </h2>
-          <div className="bg-cream-light border border-greige rounded-2xl p-5 space-y-4">
-            {DESIGN_GROUPS.map((group) => (
-              <div key={group.label}>
-                <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-                  {group.label}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {group.items.map((item) => {
-                    const on = designTags.includes(item)
-                    return (
+                {allergiesTags.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                      알러지/특이사항
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {allergiesTags.map((a) => (
+                        <span
+                          key={a}
+                          className="px-2.5 py-1 text-xs font-semibold rounded-full bg-softpink/40 text-deepbrown"
+                        >
+                          ✓ {a}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {allergiesDrawing && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+                        ✏️ 손님이 그린 알러지 메모
+                      </p>
                       <button
-                        key={item}
                         type="button"
-                        onClick={() =>
-                          setDesignTags(toggleArr(designTags, item))
-                        }
-                        className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition ${
-                          on
-                            ? 'bg-warmbrown text-nude border-warmbrown'
-                            : 'bg-white text-deepbrown border-greige hover:bg-nude'
-                        }`}
+                        onClick={() => {
+                          if (confirm('손님이 그린 그림을 지울까요?')) {
+                            setAllergiesDrawing(null)
+                          }
+                        }}
+                        className="text-[11px] font-semibold text-muted hover:text-deepbrown underline"
                       >
-                        {on && '✓ '}
-                        {item}
+                        지우기
                       </button>
-                    )
-                  })}
-                </div>
-              </div>
-            ))}
-            <div>
-              <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                기타 디자인 메모 (원장 작성)
-              </label>
-              <textarea
-                rows={2}
-                value={preferredDesign}
-                onChange={(e) => setPreferredDesign(e.target.value)}
-                placeholder="구체적인 모양/길이/각도 등 자유롭게"
-                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown resize-none"
-              />
-            </div>
-            {designDrawing && (
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-medium text-deepbrown">
-                    ✏️ 손님이 직접 그린 디자인 시안
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (confirm('손님이 그린 그림을 지울까요?')) {
-                        setDesignDrawing(null)
-                      }
-                    }}
-                    className="text-[11px] font-semibold text-muted hover:text-deepbrown underline"
-                  >
-                    지우기
-                  </button>
-                </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={designDrawing}
-                  alt="손님이 그린 디자인 시안"
-                  className="bg-white border border-greige rounded-lg w-full"
-                />
-              </div>
-            )}
-          </div>
-        </section>
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={allergiesDrawing}
+                      alt="알러지 메모"
+                      className="bg-white border border-greige rounded-lg w-full max-w-md"
+                    />
+                  </div>
+                )}
 
-        {/* 선호 컬러 */}
-        <section>
-          <h2 className="font-display font-bold text-xl tracking-tight text-deepbrown mb-2">
-            선호 컬러
-          </h2>
-          <div className="bg-cream-light border border-greige rounded-2xl p-5 space-y-4">
-            {COLOR_GROUPS.map((group) => (
-              <div key={group.label}>
-                <p className="text-xs font-semibold text-muted uppercase tracking-wider mb-2">
-                  {group.label}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {group.items.map((item) => {
-                    const on = colorTags.includes(item)
-                    return (
+                {allergies.trim() && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                      원장 추가 메모 (알러지)
+                    </p>
+                    <p className="text-sm text-deepbrown whitespace-pre-line leading-relaxed">
+                      {allergies}
+                    </p>
+                  </div>
+                )}
+
+                {designTags.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                      원하는 디자인
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {designTags.map((d) => (
+                        <span
+                          key={d}
+                          className="px-2.5 py-1 text-xs font-semibold rounded-full bg-warmbrown/15 text-deepbrown"
+                        >
+                          ✓ {d}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {designDrawing && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <p className="text-[10px] font-semibold text-muted uppercase tracking-wider">
+                        ✏️ 손님이 그린 디자인 시안
+                      </p>
                       <button
-                        key={item}
                         type="button"
-                        onClick={() => setColorTags(toggleArr(colorTags, item))}
-                        className={`px-3 py-1.5 text-xs font-semibold rounded-full border transition ${
-                          on
-                            ? 'bg-warmbrown text-nude border-warmbrown'
-                            : 'bg-white text-deepbrown border-greige hover:bg-nude'
-                        }`}
+                        onClick={() => {
+                          if (confirm('손님이 그린 그림을 지울까요?')) {
+                            setDesignDrawing(null)
+                          }
+                        }}
+                        className="text-[11px] font-semibold text-muted hover:text-deepbrown underline"
                       >
-                        {on && '✓ '}
-                        {item}
+                        지우기
                       </button>
-                    )
-                  })}
-                </div>
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={designDrawing}
+                      alt="디자인 시안"
+                      className="bg-white border border-greige rounded-lg w-full max-w-md"
+                    />
+                  </div>
+                )}
+
+                {preferredDesign.trim() && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1">
+                      원장 추가 메모 (디자인)
+                    </p>
+                    <p className="text-sm text-deepbrown whitespace-pre-line leading-relaxed">
+                      {preferredDesign}
+                    </p>
+                  </div>
+                )}
+
+                {colorTags.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted uppercase tracking-wider mb-1.5">
+                      원하는 컬러
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {colorTags.map((c) => (
+                        <span
+                          key={c}
+                          className="px-2.5 py-1 text-xs font-semibold rounded-full bg-warmbrown/15 text-deepbrown"
+                        >
+                          ✓ {c}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-[10px] font-light text-muted pt-3 border-t border-greige">
+                  💁 수정하려면 우측 상단의 <span className="font-semibold">고객 모드</span>를 열어주세요
+                </p>
               </div>
-            ))}
-          </div>
+            )
+          })()}
         </section>
 
         {/* ─── 👩‍⚕️ 고객 진단 차트 (원장이 평가/진단) ─── */}
