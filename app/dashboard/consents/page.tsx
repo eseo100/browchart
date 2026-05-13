@@ -82,7 +82,7 @@ export default function ConsentsPage() {
     load()
   }, [])
 
-  const filtered = useMemo(() => {
+  const grouped = useMemo(() => {
     let arr = consents
     if (filter !== 'all') {
       arr = arr.filter((c) => c.template_key === filter)
@@ -95,8 +95,37 @@ export default function ConsentsPage() {
         return name.includes(q) || phone.includes(q)
       })
     }
-    return arr
+    const groups: Record<string, ConsentRow[]> = {}
+    for (const c of arr) {
+      const key = c.signed_at.slice(0, 10) // YYYY-MM-DD
+      if (!groups[key]) groups[key] = []
+      groups[key].push(c)
+    }
+    for (const k in groups) {
+      groups[k].sort((a, b) => {
+        const na = a.customer?.name ?? a.signed_name ?? ''
+        const nb = b.customer?.name ?? b.signed_name ?? ''
+        return na.localeCompare(nb, 'ko')
+      })
+    }
+    const keys = Object.keys(groups).sort((a, b) => b.localeCompare(a))
+    return keys.map((k) => ({ date: k, items: groups[k] }))
   }, [consents, search, filter])
+
+  const totalCount = useMemo(
+    () => grouped.reduce((sum, g) => sum + g.items.length, 0),
+    [grouped]
+  )
+
+  const formatDateHeader = (date: string) => {
+    const d = new Date(date + 'T00:00:00')
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const wd = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()]
+    const base = `${d.getMonth() + 1}/${d.getDate()} (${wd})`
+    if (d.getTime() === today.getTime()) return `${base} · 오늘`
+    return base
+  }
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: consents.length }
@@ -182,7 +211,7 @@ export default function ConsentsPage() {
           <p className="text-sm font-light text-muted">불러오는 중...</p>
         )}
 
-        {!loading && filtered.length === 0 && (
+        {!loading && totalCount === 0 && (
           <div className="bg-cream-light border border-greige rounded-2xl p-10 text-center">
             <p className="text-3xl mb-3">✍️</p>
             <p className="font-bold text-deepbrown tracking-tight mb-1">
@@ -196,54 +225,67 @@ export default function ConsentsPage() {
           </div>
         )}
 
-        <div className="space-y-2">
-          {filtered.map((c) => {
-            const cat = c.template_key
-              ? CATEGORY_LABELS[c.template_key]
-              : null
-            return (
-              <details
-                key={c.id}
-                className="bg-cream-light border border-greige rounded-2xl overflow-hidden"
-              >
-                <summary className="px-5 py-4 cursor-pointer hover:bg-nude/40 transition list-none">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        {cat && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warmbrown/15 text-deepbrown">
-                            {cat}
-                          </span>
-                        )}
-                        {c.customer?.customer_number != null && (
-                          <span className="font-display text-[10px] font-semibold text-warmbrown tracking-wider">
-                            #{c.customer.customer_number}
-                          </span>
-                        )}
-                      </div>
-                      <p className="font-bold text-deepbrown tracking-tight">
-                        {c.customer?.name ?? c.signed_name}
-                        {c.customer && (
-                          <span className="font-light text-xs text-muted ml-2">
-                            · {formatPhone(c.customer.phone)}
-                          </span>
-                        )}
-                      </p>
-                      <p className="text-xs font-light text-muted mt-0.5 truncate">
-                        {c.title}
-                        {c.booking?.menu?.name && (
-                          <> · {c.booking.menu.name}</>
-                        )}
-                      </p>
-                    </div>
-                    <p className="font-display font-semibold text-sm text-deepbrown shrink-0">
-                      {new Date(c.signed_at).toLocaleDateString('ko-KR', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </p>
-                  </div>
-                </summary>
+        <div className="space-y-6">
+          {grouped.map((group) => (
+            <div key={group.date}>
+              <div className="flex items-center gap-3 mb-2.5 px-1">
+                <div className="h-px flex-1 bg-greige" />
+                <span className="font-display font-semibold text-sm tracking-tight text-deepbrown whitespace-nowrap">
+                  {formatDateHeader(group.date)}
+                </span>
+                <span className="text-[10px] font-light text-muted whitespace-nowrap">
+                  {group.items.length}건
+                </span>
+                <div className="h-px flex-1 bg-greige" />
+              </div>
+              <div className="space-y-2">
+                {group.items.map((c) => {
+                  const cat = c.template_key
+                    ? CATEGORY_LABELS[c.template_key]
+                    : null
+                  return (
+                    <details
+                      key={c.id}
+                      className="bg-cream-light border border-greige rounded-2xl overflow-hidden"
+                    >
+                      <summary className="px-5 py-4 cursor-pointer hover:bg-nude/40 transition list-none">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              {cat && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warmbrown/15 text-deepbrown">
+                                  {cat}
+                                </span>
+                              )}
+                              {c.customer?.customer_number != null && (
+                                <span className="font-display text-[10px] font-semibold text-warmbrown tracking-wider">
+                                  #{c.customer.customer_number}
+                                </span>
+                              )}
+                            </div>
+                            <p className="font-bold text-deepbrown tracking-tight">
+                              {c.customer?.name ?? c.signed_name}
+                              {c.customer && (
+                                <span className="font-light text-xs text-muted ml-2">
+                                  · {formatPhone(c.customer.phone)}
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-xs font-light text-muted mt-0.5 truncate">
+                              {c.title}
+                              {c.booking?.menu?.name && (
+                                <> · {c.booking.menu.name}</>
+                              )}
+                            </p>
+                          </div>
+                          <p className="font-display font-semibold text-sm text-deepbrown shrink-0">
+                            {new Date(c.signed_at).toLocaleTimeString('ko-KR', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                      </summary>
 
                 {/* 펼쳐보기 — 동의서 전체 내용 */}
                 <div className="border-t border-greige bg-white p-5 space-y-5">
@@ -367,8 +409,11 @@ export default function ConsentsPage() {
                   )}
                 </div>
               </details>
-            )
-          })}
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* 안내 */}
