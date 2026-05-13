@@ -16,6 +16,9 @@ type Salon = {
   close_hour: number
   business_hours: DayHours[] | null
   closed_dates: string[] | null
+  bank_name: string | null
+  account_number: string | null
+  account_holder: string | null
 }
 
 const DAYS = ['일', '월', '화', '수', '목', '금', '토']
@@ -43,6 +46,12 @@ export default function SettingsPage() {
   const [savingInfo, setSavingInfo] = useState(false)
   const [infoToast, setInfoToast] = useState(false)
   const [infoError, setInfoError] = useState<string | null>(null)
+  // 입금 계좌
+  const [bankName, setBankName] = useState('')
+  const [accountNumber, setAccountNumber] = useState('')
+  const [accountHolder, setAccountHolder] = useState('')
+  const [savingBank, setSavingBank] = useState(false)
+  const [bankToast, setBankToast] = useState(false)
   // 비밀번호 확인 모달
   const [pwModalOpen, setPwModalOpen] = useState(false)
   const [pwInput, setPwInput] = useState('')
@@ -58,7 +67,7 @@ export default function SettingsPage() {
       const { data } = await supabase
         .from('salons')
         .select(
-          'id, name, slug, staff_pin, open_hour, close_hour, business_hours, closed_dates'
+          'id, name, slug, staff_pin, open_hour, close_hour, business_hours, closed_dates, bank_name, account_number, account_holder'
         )
         .eq('owner_id', user.id)
         .maybeSingle()
@@ -75,6 +84,9 @@ export default function SettingsPage() {
             }))
         )
         setClosedDates((data.closed_dates as string[] | null) ?? [])
+        setBankName((data.bank_name as string | null) ?? '')
+        setAccountNumber((data.account_number as string | null) ?? '')
+        setAccountHolder((data.account_holder as string | null) ?? '')
       }
       setLoading(false)
     }
@@ -198,6 +210,26 @@ export default function SettingsPage() {
     }
     setHoursToast(true)
     setTimeout(() => setHoursToast(false), 1500)
+  }
+
+  const handleSaveBank = async () => {
+    if (!salon) return
+    setSavingBank(true)
+    const { error } = await supabase
+      .from('salons')
+      .update({
+        bank_name: bankName.trim() || null,
+        account_number: accountNumber.trim() || null,
+        account_holder: accountHolder.trim() || null,
+      })
+      .eq('id', salon.id)
+    setSavingBank(false)
+    if (error) {
+      alert('저장 실패: ' + error.message)
+      return
+    }
+    setBankToast(true)
+    setTimeout(() => setBankToast(false), 1500)
   }
 
   const addClosedDate = () => {
@@ -373,6 +405,68 @@ export default function SettingsPage() {
             <div className="pt-3 border-t border-greige">
               <BookingLinkBox slug={salon.slug} variant="card" />
             </div>
+          </div>
+        </section>
+
+        {/* 입금 계좌 */}
+        <section>
+          <div className="flex items-baseline justify-between mb-3">
+            <h2 className="font-display font-bold text-xl tracking-tight text-deepbrown">
+              💰 입금 계좌
+            </h2>
+            {bankToast && (
+              <span className="text-xs font-medium text-warmbrown">
+                ✓ 저장됨
+              </span>
+            )}
+          </div>
+          <div className="bg-cream-light border border-greige rounded-2xl p-5 space-y-3">
+            <p className="text-xs font-light text-muted">
+              손님이 예약 신청 후 안내받는 계좌예요. 손님이 직접 입금 후, 미나님이 예약관리에서 "입금 확인" 버튼을 누르면 확정.
+            </p>
+            <div>
+              <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                은행명
+              </label>
+              <input
+                type="text"
+                value={bankName}
+                onChange={(e) => setBankName(e.target.value)}
+                placeholder="국민은행"
+                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                계좌번호
+              </label>
+              <input
+                type="text"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+                placeholder="123456-78-901234"
+                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-deepbrown mb-1.5">
+                예금주
+              </label>
+              <input
+                type="text"
+                value={accountHolder}
+                onChange={(e) => setAccountHolder(e.target.value)}
+                placeholder="장미나"
+                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+              />
+            </div>
+            <button
+              onClick={handleSaveBank}
+              disabled={savingBank}
+              className="btn-primary px-5 py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50 mt-2"
+            >
+              {savingBank ? '저장 중...' : '계좌 정보 저장'}
+            </button>
           </div>
         </section>
 

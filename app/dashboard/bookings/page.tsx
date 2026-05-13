@@ -62,12 +62,40 @@ function formatPhone(p: string) {
   return p
 }
 
-function formatDateTime(date: string | null, time: string | null) {
-  if (!date) return '미정'
+function formatDateHeader(date: string) {
+  if (date === 'unscheduled') return '날짜 미정'
   const d = new Date(date + 'T00:00:00')
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tmrw = new Date(today)
+  tmrw.setDate(tmrw.getDate() + 1)
   const wd = ['일', '월', '화', '수', '목', '금', '토'][d.getDay()]
-  const md = `${d.getMonth() + 1}/${d.getDate()}(${wd})`
-  return time ? `${md} ${time.slice(0, 5)}` : md
+  const base = `${d.getMonth() + 1}/${d.getDate()} (${wd})`
+  if (d.getTime() === today.getTime()) return `${base} · 오늘`
+  if (d.getTime() === tmrw.getTime()) return `${base} · 내일`
+  return base
+}
+
+function groupByDate(bookings: Booking[], descending: boolean) {
+  const groups: Record<string, Booking[]> = {}
+  for (const b of bookings) {
+    const key = b.desired_date ?? 'unscheduled'
+    if (!groups[key]) groups[key] = []
+    groups[key].push(b)
+  }
+  for (const key in groups) {
+    groups[key].sort((a, b) => {
+      const ta = a.desired_time ?? '99:99'
+      const tb = b.desired_time ?? '99:99'
+      return ta.localeCompare(tb)
+    })
+  }
+  const keys = Object.keys(groups).sort((a, b) => {
+    if (a === 'unscheduled') return 1
+    if (b === 'unscheduled') return -1
+    return descending ? b.localeCompare(a) : a.localeCompare(b)
+  })
+  return keys.map((k) => ({ date: k, items: groups[k] }))
 }
 
 export default function BookingsPage() {
@@ -140,7 +168,16 @@ export default function BookingsPage() {
   }
 
   const filtered =
-    filter === 'all' ? bookings : bookings.filter((b) => b.status === filter)
+    filter === 'all'
+      ? bookings
+      : filter === 'cancelled'
+        ? bookings.filter(
+            (b) => b.status === 'cancelled' || b.status === 'no_show'
+          )
+        : bookings.filter((b) => b.status === filter)
+
+  const descending = filter === 'completed' || filter === 'cancelled'
+  const grouped = groupByDate(filtered, descending)
 
   const counts = {
     all: bookings.length,
@@ -225,76 +262,91 @@ export default function BookingsPage() {
           </div>
         )}
 
-        <div className="space-y-3">
-          {filtered.map((b) => {
-            const expanded = expandedId === b.id
-            const isCancelled =
-              b.status === 'cancelled' || b.status === 'no_show'
-            return (
-              <article
-                key={b.id}
-                className={`bg-cream-light border border-greige rounded-2xl overflow-hidden ${
-                  isCancelled ? 'opacity-60' : ''
-                }`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setExpandedId(expanded ? null : b.id)}
-                  className="w-full p-5 text-left hover:bg-nude/40 transition"
-                >
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span
-                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_COLOR[b.status]}`}
-                        >
-                          {STATUS_LABEL[b.status]}
-                        </span>
-                        {b.deposit_amount > 0 && (
-                          <span
-                            className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
-                              b.deposit_status === 'paid'
-                                ? 'bg-warmbrown text-nude'
-                                : 'bg-greige text-muted'
-                            }`}
-                          >
-                            {b.deposit_status === 'paid'
-                              ? '💰 입금됨'
-                              : '💸 입금대기'}
-                          </span>
-                        )}
-                        {b.consents && b.consents.length > 0 && (
-                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warmbrown/15 text-deepbrown">
-                            ✍️ 동의서 작성됨
-                          </span>
-                        )}
-                      </div>
-                      <p className="font-bold text-deepbrown tracking-tight">
-                        {b.customer_name}{' '}
-                        <span className="font-light text-xs text-muted">
-                          · {formatPhone(b.customer_phone)}
-                        </span>
-                      </p>
-                      <p className="text-sm font-light text-muted mt-0.5">
-                        {b.menu?.name ?? '메뉴 삭제됨'}
-                        {b.menu && (
-                          <span className="text-xs ml-1">
-                            · {b.menu.duration_minutes}분 ·{' '}
-                            {b.menu.price.toLocaleString()}원
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="font-display font-semibold text-sm text-deepbrown tracking-tight">
-                        {formatDateTime(b.desired_date, b.desired_time)}
-                      </p>
-                      <p className="text-[10px] font-light text-muted mt-0.5">
-                        신청 {new Date(b.created_at).toLocaleDateString('ko-KR')}
-                      </p>
-                    </div>
-                  </div>
-                </button>
+        <div className="space-y-6">
+          {grouped.map((group) => (
+            <div key={group.date}>
+              <div className="flex items-center gap-3 mb-2.5 px-1">
+                <div className="h-px flex-1 bg-greige" />
+                <span className="font-display font-semibold text-sm tracking-tight text-deepbrown whitespace-nowrap">
+                  {formatDateHeader(group.date)}
+                </span>
+                <span className="text-[10px] font-light text-muted whitespace-nowrap">
+                  {group.items.length}건
+                </span>
+                <div className="h-px flex-1 bg-greige" />
+              </div>
+              <div className="space-y-3">
+                {group.items.map((b) => {
+                  const expanded = expandedId === b.id
+                  const isCancelled =
+                    b.status === 'cancelled' || b.status === 'no_show'
+                  return (
+                    <article
+                      key={b.id}
+                      className={`bg-cream-light border border-greige rounded-2xl overflow-hidden ${
+                        isCancelled ? 'opacity-60' : ''
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => setExpandedId(expanded ? null : b.id)}
+                        className="w-full p-5 text-left hover:bg-nude/40 transition"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span
+                                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${STATUS_COLOR[b.status]}`}
+                              >
+                                {STATUS_LABEL[b.status]}
+                              </span>
+                              {b.deposit_amount > 0 && (
+                                <span
+                                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                    b.deposit_status === 'paid'
+                                      ? 'bg-warmbrown text-nude'
+                                      : 'bg-greige text-muted'
+                                  }`}
+                                >
+                                  {b.deposit_status === 'paid'
+                                    ? '💰 입금됨'
+                                    : '💸 입금대기'}
+                                </span>
+                              )}
+                              {b.consents && b.consents.length > 0 && (
+                                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-warmbrown/15 text-deepbrown">
+                                  ✍️ 동의서 작성됨
+                                </span>
+                              )}
+                            </div>
+                            <p className="font-bold text-deepbrown tracking-tight">
+                              {b.customer_name}{' '}
+                              <span className="font-light text-xs text-muted">
+                                · {formatPhone(b.customer_phone)}
+                              </span>
+                            </p>
+                            <p className="text-sm font-light text-muted mt-0.5">
+                              {b.menu?.name ?? '메뉴 삭제됨'}
+                              {b.menu && (
+                                <span className="text-xs ml-1">
+                                  · {b.menu.duration_minutes}분 ·{' '}
+                                  {b.menu.price.toLocaleString()}원
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <p className="font-display font-semibold text-base text-deepbrown tracking-tight">
+                              {b.desired_time
+                                ? b.desired_time.slice(0, 5)
+                                : '시간 미정'}
+                            </p>
+                            <p className="text-[10px] font-light text-muted mt-0.5">
+                              신청 {new Date(b.created_at).toLocaleDateString('ko-KR')}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
 
                 {expanded && (
                   <div className="border-t border-greige bg-white px-5 py-4 space-y-3">
@@ -408,8 +460,11 @@ export default function BookingsPage() {
                   </div>
                 )}
               </article>
-            )
-          })}
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       </main>
     </div>

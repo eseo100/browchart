@@ -10,6 +10,7 @@ import CustomerMode from './customer-mode'
 import PinSetupModal from './pin-setup-modal'
 import PhotoSection from './photo-section'
 import NewBookingModal from './new-booking-modal'
+import FaceAnalysis from './face-analysis'
 
 type Customer = {
   id: string
@@ -830,33 +831,54 @@ export default function CustomerDetailPage({
           </div>
         </section>
 
-        {/* 진단 메모 (키보드 + 펜) */}
+        {/* 얼굴형 분석 (사진 + 펜 + 분석 항목) */}
         <section>
           <h3 className="font-bold text-base tracking-tight text-deepbrown mb-2">
-            진단 메모 + 디자인 시안
+            😊 얼굴형 분석
           </h3>
-          <div className="space-y-4">
-            <div className="bg-cream-light border border-greige rounded-2xl p-5">
-              <label className="block text-xs font-medium text-deepbrown mb-2">
-                ⌨️ 키보드로 적기
-              </label>
-              <textarea
-                rows={4}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="진단 결과, 시술 시 주의사항, 추천 사항 등을 입력하세요."
-                className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown resize-none"
-              />
-            </div>
-            <div className="bg-cream-light border border-greige rounded-2xl p-5">
-              <label className="block text-xs font-medium text-deepbrown mb-2">
-                ✏️ 펜으로 적기 / 디자인 시안 그리기
-              </label>
-              <DrawingCanvas
-                value={notesDrawing}
-                onChange={setNotesDrawing}
-              />
-            </div>
+          <p className="text-xs font-light text-muted mb-3">
+            얼굴 사진을 분석해서 시술 디자인 결정에 활용해요. 격자/펜으로 비율 확인 가능.
+          </p>
+          <div className="bg-cream-light border border-greige rounded-2xl p-5">
+            <FaceAnalysis customerId={id} salonId={customer.salon_id} />
+          </div>
+        </section>
+
+        {/* 진단 메모 (키보드) */}
+        <section>
+          <h3 className="font-bold text-base tracking-tight text-deepbrown mb-2">
+            진단 메모
+          </h3>
+          <div className="bg-cream-light border border-greige rounded-2xl p-5">
+            <label className="block text-xs font-medium text-deepbrown mb-2">
+              ⌨️ 키보드로 적기
+            </label>
+            <textarea
+              rows={4}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="진단 결과, 시술 시 주의사항, 추천 사항 등을 입력하세요."
+              className="w-full px-3 py-2 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown resize-none"
+            />
+          </div>
+        </section>
+
+        {/* 디자인 시안 (펜) */}
+        <section>
+          <h3 className="font-bold text-base tracking-tight text-deepbrown mb-2">
+            디자인 시안
+          </h3>
+          <p className="text-xs font-light text-muted mb-3">
+            펜으로 직접 디자인 시안을 그려보세요.
+          </p>
+          <div className="bg-cream-light border border-greige rounded-2xl p-5">
+            <label className="block text-xs font-medium text-deepbrown mb-2">
+              ✏️ 펜으로 적기 / 디자인 시안 그리기
+            </label>
+            <DrawingCanvas
+              value={notesDrawing}
+              onChange={setNotesDrawing}
+            />
           </div>
         </section>
 

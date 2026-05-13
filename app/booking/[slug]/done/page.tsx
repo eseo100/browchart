@@ -17,6 +17,9 @@ type BookingDone = {
   menu_price: number | null
   salon_name: string | null
   salon_slug: string | null
+  bank_name: string | null
+  account_number: string | null
+  account_holder: string | null
 }
 
 export default function BookingDonePage({
@@ -104,9 +107,54 @@ export default function BookingDonePage({
               </span>
               을 아래 계좌로 입금해주시면 예약이 확정돼요.
             </p>
-            <div className="bg-white border border-greige rounded-lg p-3 text-sm font-light text-muted">
-              계좌 정보는 원장님이 확인 문자로 안내해드릴 거예요.
-            </div>
+            {booking.bank_name || booking.account_number ? (
+              <div className="bg-white border border-greige rounded-lg p-4 space-y-1.5">
+                {booking.bank_name && (
+                  <p className="text-sm text-deepbrown">
+                    <span className="font-light text-muted w-16 inline-block">
+                      은행
+                    </span>
+                    <span className="font-semibold">{booking.bank_name}</span>
+                  </p>
+                )}
+                {booking.account_number && (
+                  <p className="text-sm text-deepbrown flex items-center gap-2">
+                    <span className="font-light text-muted w-16 inline-block">
+                      계좌
+                    </span>
+                    <span className="font-display font-bold tracking-wide flex-1">
+                      {booking.account_number}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          booking.account_number ?? ''
+                        )
+                        alert('계좌번호가 복사됐어요')
+                      }}
+                      className="text-[11px] font-semibold px-2 py-1 rounded-md border border-greige text-deepbrown hover:bg-cream-light transition whitespace-nowrap"
+                    >
+                      복사
+                    </button>
+                  </p>
+                )}
+                {booking.account_holder && (
+                  <p className="text-sm text-deepbrown">
+                    <span className="font-light text-muted w-16 inline-block">
+                      예금주
+                    </span>
+                    <span className="font-semibold">
+                      {booking.account_holder}
+                    </span>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white border border-greige rounded-lg p-3 text-sm font-light text-muted">
+                계좌 정보는 원장님이 확인 문자로 안내해드릴 거예요.
+              </div>
+            )}
             <p className="text-[11px] font-light text-muted mt-3 leading-relaxed">
               * 입금자명은 예약자 본인 이름으로 부탁드려요.
               <br />* 입금 후 24시간 내 예약이 확정됩니다.
