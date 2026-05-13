@@ -84,6 +84,25 @@ const STATUS_STYLE: Record<string, string> = {
   no_show: 'bg-cream-light text-muted',
 }
 
+function Field({
+  label,
+  children,
+  colSpan,
+}: {
+  label: string
+  children: React.ReactNode
+  colSpan?: boolean
+}) {
+  return (
+    <div className={colSpan ? 'sm:col-span-2' : ''}>
+      <label className="block text-xs font-medium text-deepbrown mb-1.5 whitespace-nowrap">
+        {label}
+      </label>
+      {children}
+    </div>
+  )
+}
+
 function formatPhone(p: string) {
   const digits = p.replace(/\D/g, '')
   if (digits.length === 11)
@@ -453,56 +472,41 @@ export default function CustomerDetailPage({
           <h2 className="font-display font-bold text-xl tracking-tight text-deepbrown mb-4">
             기본 정보
           </h2>
-          <div className="bg-cream-light border border-greige rounded-2xl p-5 space-y-4">
-            {/* 1줄: 이름 + 전화번호 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                  이름
-                </label>
+          <div className="bg-cream-light border border-greige rounded-2xl p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4">
+              <Field label="이름">
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown box-border"
                 />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-deepbrown mb-1.5">
-                  전화번호
-                </label>
+              </Field>
+              <Field label="전화번호">
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown"
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown box-border"
                 />
-                <p className="text-[10px] font-light text-muted mt-1">
-                  ⚠️ 같은 번호로 다른 손님이 등록돼있으면 저장 안 돼요.
-                </p>
-              </div>
-            </div>
-
-            {/* 2줄: 생일 + 최근 시술 + 리터치 예정일 — 3등분, 라벨/높이 통일 */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex flex-col">
-                <label className="block text-xs font-medium text-deepbrown mb-1.5 whitespace-nowrap">
-                  생일
-                </label>
+              </Field>
+              <Field label="생일">
                 <input
                   type="date"
                   value={birthDate}
                   onChange={(e) => setBirthDate(e.target.value)}
                   className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown box-border"
                 />
-                <p className="text-[10px] font-light text-muted mt-1 invisible">
-                  &nbsp;
-                </p>
-              </div>
-              <div className="flex flex-col">
-                <label className="block text-xs font-medium text-deepbrown mb-1.5 whitespace-nowrap">
-                  최근 시술
-                </label>
+              </Field>
+              <Field label="리터치 예정일">
+                <input
+                  type="date"
+                  value={nextRetouchDate}
+                  onChange={(e) => setNextRetouchDate(e.target.value)}
+                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown box-border"
+                />
+              </Field>
+              <Field label="최근 시술" colSpan>
                 <div className="w-full h-10 px-3 bg-greige/30 border border-greige rounded-lg text-sm text-deepbrown flex items-center truncate box-border">
                   {(() => {
                     const last =
@@ -522,25 +526,11 @@ export default function CustomerDetailPage({
                     )
                   })()}
                 </div>
-                <p className="text-[10px] font-light text-muted mt-1 whitespace-nowrap">
-                  예약 이력에서 자동
-                </p>
-              </div>
-              <div className="flex flex-col">
-                <label className="block text-xs font-medium text-deepbrown mb-1.5 whitespace-nowrap">
-                  리터치 예정일
-                </label>
-                <input
-                  type="date"
-                  value={nextRetouchDate}
-                  onChange={(e) => setNextRetouchDate(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-greige rounded-lg text-sm focus:outline-none focus:border-warmbrown box-border"
-                />
-                <p className="text-[10px] font-light text-muted mt-1 whitespace-nowrap">
-                  시술 완료 시 35일 후
-                </p>
-              </div>
+              </Field>
             </div>
+            <p className="text-[10px] font-light text-muted mt-3">
+              ⚠️ 전화번호 중복 시 저장 안돼요 · 리터치는 시술 완료 시 35일 후 자동
+            </p>
           </div>
         </section>
 
