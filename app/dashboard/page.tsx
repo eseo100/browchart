@@ -303,9 +303,9 @@ function CreateSalonView({ onCreated }: { onCreated: () => void }) {
   const handleCreate = async () => {
     setError(null)
     if (!salonName.trim()) return setError('매장명을 입력해주세요')
-    if (!/^[a-z0-9-]{2,30}$/.test(slug))
+    if (!/^[a-z0-9]{2,30}$/.test(slug))
       return setError(
-        '매장 URL은 영문 소문자·숫자·하이픈만 사용 (2~30자)'
+        '매장 URL은 영문 소문자와 숫자만 사용 (2~30자)'
       )
 
     setSaving(true)
@@ -390,22 +390,22 @@ function CreateSalonView({ onCreated }: { onCreated: () => void }) {
           <label className="text-xs font-medium text-muted block mb-1.5">
             매장 URL{' '}
             <span className="font-light text-muted">
-              (영문 소문자/숫자/하이픈)
+              (영문 소문자/숫자만)
             </span>
           </label>
           <input
             type="text"
             value={slug}
             onChange={(e) =>
-              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))
             }
             className="w-full h-10 bg-nude border border-greige rounded-lg px-3 text-sm outline-none focus:border-warmbrown transition font-display"
-            placeholder="mina-brow"
+            placeholder="minabrow"
           />
           <p className="text-[11px] font-light text-muted mt-1.5">
             손님 예약링크:{' '}
             <span className="font-medium text-deepbrown">
-              /booking/{slug || 'mina-brow'}
+              /booking/{slug || 'minabrow'}
             </span>
           </p>
         </div>

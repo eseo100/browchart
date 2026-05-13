@@ -31,7 +31,13 @@ export default function LoginPage() {
         </span>
       </Link>
 
-      <div className="w-full max-w-sm bg-cream-light border border-greige rounded-2xl p-7 space-y-5">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleLogin()
+        }}
+        className="w-full max-w-sm bg-cream-light border border-greige rounded-2xl p-7 space-y-5"
+      >
         <div>
           <h1 className="font-bold text-xl text-deepbrown tracking-tight">로그인</h1>
           <p className="text-xs font-light text-muted mt-1">
@@ -46,8 +52,10 @@ export default function LoginPage() {
             </label>
             <input
               type="email"
+              name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               className="w-full bg-nude border border-greige rounded-lg px-3 py-2.5 text-sm outline-none focus:border-warmbrown transition"
               placeholder="example@email.com"
             />
@@ -58,11 +66,10 @@ export default function LoginPage() {
             </label>
             <input
               type="password"
+              name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleLogin()
-              }}
+              autoComplete="current-password"
               className="w-full bg-nude border border-greige rounded-lg px-3 py-2.5 text-sm outline-none focus:border-warmbrown transition"
               placeholder="••••••••"
             />
@@ -70,7 +77,7 @@ export default function LoginPage() {
         </div>
 
         <button
-          onClick={handleLogin}
+          type="submit"
           disabled={loading}
           className="w-full btn-primary py-3 rounded-xl text-sm font-semibold disabled:opacity-50"
         >
@@ -83,7 +90,7 @@ export default function LoginPage() {
             무료로 시작하기
           </Link>
         </p>
-      </div>
+      </form>
     </div>
   )
 }

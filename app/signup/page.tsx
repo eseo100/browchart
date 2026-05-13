@@ -24,8 +24,8 @@ export default function SignupPage() {
     }
     if (!name.trim()) return alert('원장님 이름을 입력해주세요')
     if (!salonName.trim()) return alert('매장명을 입력해주세요')
-    if (!/^[a-z0-9-]{2,30}$/.test(slug)) {
-      return alert('매장 URL은 영문 소문자, 숫자, 하이픈만 사용할 수 있어요 (2~30자)')
+    if (!/^[a-z0-9]{2,30}$/.test(slug)) {
+      return alert('매장 URL은 영문 소문자와 숫자만 사용할 수 있어요 (2~30자)')
     }
 
     setLoading(true)
@@ -86,6 +86,13 @@ export default function SignupPage() {
       return
     }
 
+    // 회원가입 완료 안내
+    alert(
+      '🎉 회원가입이 완료되었어요!\n\n' +
+        `매장: ${salonName.trim()}\n` +
+        `예약 링크: /booking/${slug}\n\n` +
+        '대시보드로 이동해요.'
+    )
     router.replace('/dashboard')
   }
 
@@ -116,6 +123,7 @@ export default function SignupPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
               className="w-full bg-nude border border-greige rounded-lg px-3 py-2.5 text-sm outline-none focus:border-warmbrown transition"
               placeholder="example@email.com"
             />
@@ -129,6 +137,7 @@ export default function SignupPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
               className="w-full bg-nude border border-greige rounded-lg px-3 py-2.5 text-sm outline-none focus:border-warmbrown transition"
               placeholder="••••••••"
             />
@@ -142,6 +151,7 @@ export default function SignupPage() {
               type="password"
               value={passwordConfirm}
               onChange={(e) => setPasswordConfirm(e.target.value)}
+              autoComplete="new-password"
               className="w-full bg-nude border border-greige rounded-lg px-3 py-2.5 text-sm outline-none focus:border-warmbrown transition"
               placeholder="••••••••"
             />
@@ -188,23 +198,23 @@ export default function SignupPage() {
                 <label className="text-xs font-medium text-muted block mb-1.5">
                   매장 URL{' '}
                   <span className="font-light text-muted">
-                    (영문 소문자/숫자/하이픈)
+                    (영문 소문자/숫자만)
                   </span>
                 </label>
                 <input
                   type="text"
                   value={slug}
                   onChange={(e) =>
-                    setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+                    setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))
                   }
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSignup()
                   }}
                   className="w-full bg-nude border border-greige rounded-lg px-3 py-2.5 text-sm outline-none focus:border-warmbrown transition font-display"
-                  placeholder="mina-brow"
+                  placeholder="minabrow"
                 />
                 <p className="text-[11px] font-light text-muted mt-1.5 tracking-tight">
-                  손님 예약링크: <span className="font-medium text-deepbrown">/booking/{slug || 'mina-brow'}</span>
+                  손님 예약링크: <span className="font-medium text-deepbrown">/booking/{slug || 'minabrow'}</span>
                 </p>
               </div>
             </div>

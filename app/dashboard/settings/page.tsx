@@ -89,9 +89,9 @@ export default function SettingsPage() {
       setInfoError('매장명을 입력해주세요.')
       return
     }
-    if (!/^[a-z0-9-]{2,30}$/.test(editSlug)) {
+    if (!/^[a-z0-9]{2,30}$/.test(editSlug)) {
       setInfoError(
-        '링크 이름은 영문 소문자/숫자/하이픈만 2~30자로 입력하세요.'
+        '링크 이름은 영문 소문자와 숫자만 2~30자로 입력하세요.'
       )
       return
     }
@@ -313,7 +313,7 @@ export default function SettingsPage() {
               <label className="block text-xs font-medium text-deepbrown mb-1.5">
                 링크 이름{' '}
                 <span className="font-light text-muted">
-                  (영문 소문자/숫자/하이픈)
+                  (영문 소문자/숫자만)
                 </span>
               </label>
               <input
@@ -321,7 +321,7 @@ export default function SettingsPage() {
                 value={editSlug}
                 onChange={(e) =>
                   setEditSlug(
-                    e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                    e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '')
                   )
                 }
                 disabled={!infoEditable}
@@ -330,7 +330,7 @@ export default function SettingsPage() {
                     ? 'bg-white border-greige focus:border-warmbrown'
                     : 'bg-greige/30 border-greige text-deepbrown cursor-not-allowed'
                 }`}
-                placeholder="mina-brow"
+                placeholder="minabrow"
               />
               {infoEditable && (
                 <p className="text-[11px] font-light text-muted mt-1.5">
