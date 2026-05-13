@@ -32,6 +32,27 @@ function formatNumber(n: number | null) {
   return '#' + n
 }
 
+const CHOSUNG = [
+  'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
+  'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+]
+const CHOSUNG_MERGE: Record<string, string> = {
+  ㄲ: 'ㄱ', ㄸ: 'ㄷ', ㅃ: 'ㅂ', ㅆ: 'ㅅ', ㅉ: 'ㅈ',
+}
+
+function getInitial(name: string | null): string {
+  if (!name) return '#'
+  const c = name.charAt(0)
+  const code = c.charCodeAt(0)
+  if (code >= 0xac00 && code <= 0xd7a3) {
+    const idx = Math.floor((code - 0xac00) / 588)
+    const ch = CHOSUNG[idx]
+    return CHOSUNG_MERGE[ch] ?? ch
+  }
+  if (/[a-zA-Z]/.test(c)) return c.toUpperCase()
+  return '#'
+}
+
 function relativeDate(d: string | null) {
   if (!d) return '-'
   const target = new Date(d)
@@ -119,6 +140,100 @@ export default function CustomersPage() {
       }
     })
   }, [customers, search, sort])
+
+  const grouped = useMemo(() => {
+    if (sort !== 'name') return null
+    const map: Record<string, Customer[]> = {}
+    for (const c of filtered) {
+      const key = getInitial(c.name)
+      if (!map[key]) map[key] = []
+      map[key].push(c)
+    }
+    const order = [
+      'ㄱ', 'ㄴ', 'ㄷ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅅ', 'ㅇ', 'ㅈ', 'ㅊ',
+      'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
+    ]
+    const keys = Object.keys(map).sort((a, b) => {
+      const ia = order.indexOf(a)
+      const ib = order.indexOf(b)
+      if (ia !== -1 && ib !== -1) return ia - ib
+      if (ia !== -1) return -1
+      if (ib !== -1) return 1
+      return a.localeCompare(b)
+    })
+    return keys.map((k) => ({ initial: k, items: map[k] }))
+  }, [filtered, sort])
+
+  const renderCard = (c: Customer) => {
+    const retouchDate = c.next_retouch_date
+      ? new Date(c.next_retouch_date)
+      : null
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const retouchSoon =
+      retouchDate &&
+      retouchDate.getTime() - today.getTime() <= 7 * 24 * 60 * 60 * 1000 &&
+      retouchDate.getTime() >= today.getTime() - 7 * 24 * 60 * 60 * 1000
+    const grade = getCustomerGrade(c.total_visits)
+    return (
+      <Link
+        key={c.id}
+        href={`/dashboard/customers/${c.id}`}
+        className="bg-cream-light border border-greige hover:border-warmbrown rounded-2xl p-4 transition"
+      >
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
+              {c.customer_number != null && (
+                <span className="font-display text-[10px] font-semibold text-warmbrown tracking-wider">
+                  {formatNumber(c.customer_number)}
+                </span>
+              )}
+              <span
+                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${GRADE_STYLE[grade]}`}
+              >
+                {grade}
+              </span>
+            </div>
+            <p className="font-bold text-deepbrown tracking-tight truncate">
+              {c.name ?? '이름 없음'}
+            </p>
+            <p className="text-xs font-light text-muted mt-0.5">
+              {formatPhone(c.phone)}
+            </p>
+            {c.tags && c.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-1.5">
+                {c.tags.slice(0, 3).map((t) => (
+                  <span
+                    key={t}
+                    className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-roselight text-deepbrown"
+                  >
+                    🏷 {t}
+                  </span>
+                ))}
+                {c.tags.length > 3 && (
+                  <span className="text-[9px] font-light text-muted">
+                    +{c.tags.length - 3}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          <span className="bg-white border border-greige rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-deepbrown shrink-0">
+            {c.total_visits}회
+          </span>
+        </div>
+        <div className="flex items-center gap-3 text-[11px] font-light text-muted pt-2 border-t border-greige/60">
+          <span>최근 {relativeDate(c.last_visit_at)}</span>
+          {c.next_retouch_date && (
+            <span className={retouchSoon ? 'font-medium text-softpink' : ''}>
+              🔁 리터치 {relativeDate(c.next_retouch_date)}
+            </span>
+          )}
+        </div>
+      </Link>
+    )
+  }
 
   const sortOptions: { key: SortKey; label: string }[] = [
     { key: 'recent', label: '최근 방문순' },
@@ -228,90 +343,30 @@ export default function CustomersPage() {
           />
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {filtered.map((c) => {
-            const retouchDate = c.next_retouch_date
-              ? new Date(c.next_retouch_date)
-              : null
-            const today = new Date()
-            today.setHours(0, 0, 0, 0)
-            const retouchSoon =
-              retouchDate &&
-              retouchDate.getTime() - today.getTime() <=
-                7 * 24 * 60 * 60 * 1000 &&
-              retouchDate.getTime() >= today.getTime() - 7 * 24 * 60 * 60 * 1000
-
-            return (
-              <Link
-                key={c.id}
-                href={`/dashboard/customers/${c.id}`}
-                className="bg-cream-light border border-greige hover:border-warmbrown rounded-2xl p-4 transition"
-              >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-                      {c.customer_number != null && (
-                        <span className="font-display text-[10px] font-semibold text-warmbrown tracking-wider">
-                          {formatNumber(c.customer_number)}
-                        </span>
-                      )}
-                      {(() => {
-                        const grade = getCustomerGrade(c.total_visits)
-                        return (
-                          <span
-                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${GRADE_STYLE[grade]}`}
-                          >
-                            {grade}
-                          </span>
-                        )
-                      })()}
-                    </div>
-                    <p className="font-bold text-deepbrown tracking-tight truncate">
-                      {c.name ?? '이름 없음'}
-                    </p>
-                    <p className="text-xs font-light text-muted mt-0.5">
-                      {formatPhone(c.phone)}
-                    </p>
-                    {c.tags && c.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1.5">
-                        {c.tags.slice(0, 3).map((t) => (
-                          <span
-                            key={t}
-                            className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-roselight text-deepbrown"
-                          >
-                            🏷 {t}
-                          </span>
-                        ))}
-                        {c.tags.length > 3 && (
-                          <span className="text-[9px] font-light text-muted">
-                            +{c.tags.length - 3}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  <span className="bg-white border border-greige rounded-full px-2.5 py-0.5 text-[11px] font-semibold text-deepbrown shrink-0">
-                    {c.total_visits}회
+        {grouped ? (
+          <div className="space-y-6">
+            {grouped.map((g) => (
+              <div key={g.initial}>
+                <div className="flex items-center gap-3 mb-3 px-1">
+                  <span className="font-display font-bold text-2xl tracking-tight text-deepbrown">
+                    {g.initial}
                   </span>
+                  <span className="text-[11px] font-light text-muted">
+                    {g.items.length}명
+                  </span>
+                  <div className="h-px flex-1 bg-greige" />
                 </div>
-                <div className="flex items-center gap-3 text-[11px] font-light text-muted pt-2 border-t border-greige/60">
-                  <span>최근 {relativeDate(c.last_visit_at)}</span>
-                  {c.next_retouch_date && (
-                    <span
-                      className={
-                        retouchSoon
-                          ? 'font-medium text-softpink'
-                          : ''
-                      }
-                    >
-                      🔁 리터치 {relativeDate(c.next_retouch_date)}
-                    </span>
-                  )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {g.items.map(renderCard)}
                 </div>
-              </Link>
-            )
-          })}
-        </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {filtered.map(renderCard)}
+          </div>
+        )}
       </main>
     </div>
   )
