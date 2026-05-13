@@ -550,9 +550,14 @@ function QuickSaleModal({
       alert('시술명을 입력해주세요')
       return
     }
-    const num = parseInt(amount.replace(/\D/g, ''), 10)
-    if (!num || num <= 0) {
-      alert('금액을 입력해주세요')
+    const digits = amount.replace(/\D/g, '')
+    if (!digits) {
+      alert('금액을 입력해주세요 (0원도 가능)')
+      return
+    }
+    const num = parseInt(digits, 10)
+    if (Number.isNaN(num) || num < 0) {
+      alert('올바른 금액을 입력해주세요')
       return
     }
     if (!salonId) return
