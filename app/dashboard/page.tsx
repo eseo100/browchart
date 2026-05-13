@@ -129,6 +129,11 @@ export default function DashboardPage() {
     )
   }
 
+  // 매장 없으면 매장 만들기 화면 보여줌 (회원가입 중간에 끊긴 경우)
+  if (!salon) {
+    return <CreateSalonView onCreated={() => window.location.reload()} />
+  }
+
   return (
     <div className="min-h-screen">
       {/* 상단 바 */}
@@ -284,6 +289,149 @@ export default function DashboardPage() {
           </p>
         </section>
       </main>
+    </div>
+  )
+}
+
+/* ────── 매장이 없을 때 보이는 매장 생성 화면 ────── */
+function CreateSalonView({ onCreated }: { onCreated: () => void }) {
+  const [salonName, setSalonName] = useState('')
+  const [slug, setSlug] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleCreate = async () => {
+    setError(null)
+    if (!salonName.trim()) return setError('매장명을 입력해주세요')
+    if (!/^[a-z0-9-]{2,30}$/.test(slug))
+      return setError(
+        '매장 URL은 영문 소문자·숫자·하이픈만 사용 (2~30자)'
+      )
+
+    setSaving(true)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) {
+      setError('로그인이 필요해요')
+      setSaving(false)
+      return
+    }
+
+    // slug 중복 체크
+    const { data: dup } = await supabase
+      .from('salons')
+      .select('id')
+      .eq('slug', slug)
+      .maybeSingle()
+    if (dup) {
+      setError('이미 사용 중인 URL이에요. 다른 걸 시도해주세요')
+      setSaving(false)
+      return
+    }
+
+    // 매장 생성
+    const { data: salonData, error: salonError } = await supabase
+      .from('salons')
+      .insert({
+        name: salonName.trim(),
+        slug,
+        owner_id: user.id,
+      })
+      .select()
+      .single()
+
+    if (salonError) {
+      setError('매장 생성 실패: ' + salonError.message)
+      setSaving(false)
+      return
+    }
+
+    // 프로필 upsert (이미 있으면 salon_id만 갱신, 없으면 새로)
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      salon_id: salonData.id,
+      role: 'owner',
+    })
+
+    setSaving(false)
+    onCreated()
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-cream-light border border-greige rounded-2xl p-7 space-y-5">
+        <div>
+          <p className="font-display text-xs font-semibold text-softpink uppercase tracking-[0.2em] mb-2">
+            Welcome
+          </p>
+          <h1 className="font-bold text-2xl tracking-tight text-deepbrown">
+            매장 만들기
+          </h1>
+          <p className="text-xs font-light text-muted mt-1.5">
+            로그인은 됐는데 매장이 없어요. 지금 매장을 만들어보세요.
+          </p>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted block mb-1.5">
+            매장명
+          </label>
+          <input
+            type="text"
+            value={salonName}
+            onChange={(e) => setSalonName(e.target.value)}
+            className="w-full h-10 bg-nude border border-greige rounded-lg px-3 text-sm outline-none focus:border-warmbrown transition"
+            placeholder="미나브로우"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-muted block mb-1.5">
+            매장 URL{' '}
+            <span className="font-light text-muted">
+              (영문 소문자/숫자/하이픈)
+            </span>
+          </label>
+          <input
+            type="text"
+            value={slug}
+            onChange={(e) =>
+              setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))
+            }
+            className="w-full h-10 bg-nude border border-greige rounded-lg px-3 text-sm outline-none focus:border-warmbrown transition font-display"
+            placeholder="mina-brow"
+          />
+          <p className="text-[11px] font-light text-muted mt-1.5">
+            손님 예약링크:{' '}
+            <span className="font-medium text-deepbrown">
+              /booking/{slug || 'mina-brow'}
+            </span>
+          </p>
+        </div>
+
+        {error && (
+          <p className="text-sm font-medium text-softpink">{error}</p>
+        )}
+
+        <button
+          onClick={handleCreate}
+          disabled={saving}
+          className="w-full btn-primary py-3 rounded-xl text-sm font-semibold disabled:opacity-50"
+        >
+          {saving ? '만드는 중...' : '매장 만들기'}
+        </button>
+
+        <button
+          onClick={async () => {
+            await supabase.auth.signOut()
+            window.location.href = '/login'
+          }}
+          className="w-full text-xs font-medium text-muted hover:text-deepbrown"
+        >
+          다른 계정으로 로그인
+        </button>
+      </div>
     </div>
   )
 }
